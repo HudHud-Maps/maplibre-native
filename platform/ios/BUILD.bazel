@@ -187,64 +187,64 @@ apple_bundle_version(
     build_version = "1.0.0",
 )
 
-ios_application(
-    name = "App",
-    bundle_id = "{}.maplibre.app".format(BUNDLE_ID_PREFIX),
-    families = [
-        "iphone",
-        "ipad",
-    ],
-    infoplists = ["info_app_plist"],
-    minimum_os_version = "12.0",
-    provisioning_profile = "xcode_profile",
-    resources = _IOS_APPLICATION_RESOURCES,
-    version = ":maplibre_app_version",
-    visibility = ["//visibility:public"],
-    deps = [
-        "//platform:iosapp",
-    ],
-)
+# ios_application(
+#     name = "App",
+#     bundle_id = "{}.maplibre.app".format(BUNDLE_ID_PREFIX),
+#     families = [
+#         "iphone",
+#         "ipad",
+#     ],
+#     infoplists = ["info_app_plist"],
+#     minimum_os_version = "12.0",
+#     provisioning_profile = "xcode_profile",
+#     resources = _IOS_APPLICATION_RESOURCES,
+#     version = ":maplibre_app_version",
+#     visibility = ["//visibility:public"],
+#     deps = [
+#         "//platform:iosapp",
+#     ],
+# )
 
-ios_application(
-    name = "AppDynamicLib",
-    bundle_id = "org.maplibre.app",
-    families = [
-        "iphone",
-        "ipad",
-    ],
-    frameworks = [
-        "MapLibre.link",
-    ],
-    infoplists = ["app/Info.plist"],
-    minimum_os_version = "12.0",
-    provisioning_profile = ":xcode_profile",
-    resources = _IOS_APPLICATION_RESOURCES,
-    visibility = ["//visibility:public"],
-    deps = [
-        "//platform:iosapp",
-    ],
-)
+# ios_application(
+#     name = "AppDynamicLib",
+#     bundle_id = "org.maplibre.app",
+#     families = [
+#         "iphone",
+#         "ipad",
+#     ],
+#     frameworks = [
+#         "MapLibre.link",
+#     ],
+#     infoplists = ["app/Info.plist"],
+#     minimum_os_version = "12.0",
+#     provisioning_profile = ":xcode_profile",
+#     resources = _IOS_APPLICATION_RESOURCES,
+#     visibility = ["//visibility:public"],
+#     deps = [
+#         "//platform:iosapp",
+#     ],
+# )
 
-ios_application(
-    name = "BenchmarkApp",
-    bundle_id = "{}.benchmark.app".format(BUNDLE_ID_PREFIX),
-    families = [
-        "iphone",
-        "ipad",
-    ],
-    infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
-    minimum_os_version = "12.0",
-    provisioning_profile = "xcode_profile",
-    resources = [
-        "//platform/ios/benchmark:bundle_resources",
-        "//platform/ios/benchmark/assets:benchmark_assets",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//platform:ios-benchapp",
-        "//platform:ios-sdk",
-    ],
-)
+# ios_application(
+#     name = "BenchmarkApp",
+#     bundle_id = "{}.benchmark.app".format(BUNDLE_ID_PREFIX),
+#     families = [
+#         "iphone",
+#         "ipad",
+#     ],
+#     infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
+#     minimum_os_version = "12.0",
+#     provisioning_profile = "xcode_profile",
+#     resources = [
+#         "//platform/ios/benchmark:bundle_resources",
+#         "//platform/ios/benchmark/assets:benchmark_assets",
+#     ],
+#     visibility = ["//visibility:public"],
+#     deps = [
+#         "//platform:ios-benchapp",
+#         "//platform:ios-sdk",
+#     ],
+# )
 
 filegroup(
     name = "extra_files",
@@ -271,27 +271,27 @@ xcodeproj(
     project_name = "MapLibre",
     tags = ["manual"],
     top_level_targets = [
-        top_level_target(
-            "App",
-            target_environments = [
-                "simulator",
-                "device",
-            ],
-        ),
-        top_level_target(
-            "//platform/ios/app-swift:MapLibreApp",
-            target_environments = [
-                "simulator",
-                "device",
-            ],
-        ),
-        top_level_target(
-            "BenchmarkApp",
-            target_environments = [
-                "simulator",
-                "device",
-            ],
-        ),
+        # top_level_target(
+        #     "App",
+        #     target_environments = [
+        #         "simulator",
+        #         "device",
+        #     ],
+        # ),
+        # top_level_target(
+        #     "//platform/ios/app-swift:MapLibreApp",
+        #     target_environments = [
+        #         "simulator",
+        #         "device",
+        #     ],
+        # ),
+        # top_level_target(
+        #     "BenchmarkApp",
+        #     target_environments = [
+        #         "simulator",
+        #         "device",
+        #     ],
+        # ),
         top_level_target(
             "//render-test/ios:RenderTest",
             target_environments = [
