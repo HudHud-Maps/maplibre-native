@@ -321,7 +321,7 @@ jobs:
       - name: Release (Swift Package Index)
         # if: env.make_release
         run: |
-          echo "::add-mask::${{ steps.generate_token.outputs.token }}"
+          echo "::add-mask::${{ secrets.MAPLIBRE_NATIVE_PRIVATE_TOKEN }}"
           release_workflow_name=release.yml # github api allows you to pass workflow name instead of id
           curl -L \
             -X POST \
@@ -333,11 +333,11 @@ jobs:
               "version":"${{ env.version }}",
               "download_url":"${{ fromJSON(steps.github_release.outputs.assets)[0].browser_download_url }}"}}'
 
-      - name: Release (CocoaPods)
-        shell: bash -leo pipefail {0}  # so pod is found
-        if: env.make_release
-        run: |
-          VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
+      # - name: Release (CocoaPods)
+      #   shell: bash -leo pipefail {0}  # so pod is found
+      #   if: env.make_release
+      #   run: |
+      #     VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
 
   ios-ci-result:
     runs-on: ubuntu-latest
