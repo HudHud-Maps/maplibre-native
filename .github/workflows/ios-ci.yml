@@ -29,6 +29,7 @@ on:
 permissions:
   id-token: write         # needed for AWS
   contents: write         # allow making a release
+  actions:  write          # allow dispatching events
 
 jobs:
   pre_job:
