@@ -35,6 +35,7 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
     paintParameters.backend.getDefaultRenderable().getResource<gfx::RenderableResource>().bind();
 
     context.setDirtyState();
+    context.bindGlobalUniformBuffers(*paintParameters.renderPass);
 }
 
 } // namespace gfx
