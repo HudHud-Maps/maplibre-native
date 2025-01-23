@@ -24,6 +24,7 @@ typedef struct MLNStyleLayerDrawingContext {
   CGFloat pitch;
   CGFloat fieldOfView;
   MLNMatrix4 projectionMatrix;
+  MLNMatrix4 nearClippedProjMatrix;
 } MLNStyleLayerDrawingContext;
 
 MLN_EXPORT

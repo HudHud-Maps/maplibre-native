@@ -300,38 +300,38 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
         _manager->setProjectionCallback(^Cartesian3D(const Coordinate2D & coordinate){
             Cartesian3D tempResult;
             
-            tempResult._x = 0;
-            tempResult._y = 0;
+            tempResult._x = 5198170.102753558;
+            tempResult._y = 2832006.4886368043;
             tempResult._z = 0;
-
+            
             tempResult._x = coordinate._lon * DEG_RAD;
             double lat = coordinate._lat * DEG_RAD;
-//            if (lat < -PoleLimit) lat = -PoleLimit;
-//            if (lat > PoleLimit) lat = PoleLimit;
             tempResult._y = log((1.0f+sin(lat))/cos(lat));
 
             double metersScale = 20037508.34;
             tempResult._x = tempResult._x * metersScale / M_PI;
             tempResult._y = tempResult._y * metersScale / M_PI;
             return tempResult;
-            
         });
         
         loadModels = true;
     }
     
     _metalEnvironment->_currentFOVDEG = context.fieldOfView * RAD_DEG;
-    _metalEnvironment->_currentProjectionMatrix = toSimdMatrix4D(context.projectionMatrix);
+    _metalEnvironment->_currentProjectionMatrix = toSimdMatrix4D(context.nearClippedProjMatrix);
     _metalEnvironment->_currentZoomLevel = context.zoomLevel;
     _metalEnvironment->_currentCommandEncoder = self.renderEncoder;
     _metalEnvironment->_currentCommandBuffer = resource.commandBuffer;
     _metalEnvironment->_metalDevice = resource.mtkView.device;
     _metalEnvironment->_currentDrawable = resource.mtkView.currentDrawable;
     _metalEnvironment->_currentRenderPassDescriptor = resource.mtkView.currentRenderPassDescriptor;
+    _metalEnvironment->_depthStencilTexture = resource.mtkView.currentRenderPassDescriptor.depthAttachment.texture;
+    _metalEnvironment->_colorTexture = resource.mtkView.currentRenderPassDescriptor.colorAttachments[0].texture;
+
     if (self.lightSet) {
         _metalEnvironment->_lightDirection = simd_make_float3(_lightX, _lightY, _lightZ);
     }
-
+    
     // TODO: Remove this..  This is legacy
     _manager->setRenderingEnvironmentVariables(_metalEnvironment);
 
@@ -354,7 +354,6 @@ simd_double4x4 toSimdMatrix4D(const MLNMatrix4 & mlMatrix) {
         
     // Render the image
     _manager->render();
-     
 }
 
 - (void)willMoveFromMapView:(MLNMapView *)mapView {
