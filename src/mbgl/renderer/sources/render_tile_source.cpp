@@ -326,6 +326,67 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
     // function to add polylines drawable
     const auto addPolylineDrawable = [&](TileLayerGroup* tileLayerGroup, const RenderTile& tile) {
+        class PolylineDrawableTweaker : public gfx::DrawableTweaker {
+        public:
+            PolylineDrawableTweaker(const shaders::LineEvaluatedPropsUBO& properties)
+                : linePropertiesUBO(properties) {}
+            ~PolylineDrawableTweaker() override = default;
+
+            void init(gfx::Drawable&) override {}
+
+            void execute(gfx::Drawable& drawable, PaintParameters& parameters) override {
+                if (!drawable.getTileID().has_value()) {
+                    return;
+                }
+
+                const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+                const auto zoom = parameters.state.getZoom();
+                mat4 tileMatrix;
+                parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
+
+                const auto matrix = LayerTweaker::getTileMatrix(
+                    tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
+
+                const shaders::LineDrawableUBO drawableUBO = {/*matrix = */ util::cast<float>(matrix),
+                                                              /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+                                                              0,
+                                                              0,
+                                                              0};
+                const shaders::LineInterpolationUBO lineInterpolationUBO = {/*color_t =*/0.f,
+                                                                            /*blur_t =*/0.f,
+                                                                            /*opacity_t =*/0.f,
+                                                                            /*gapwidth_t =*/0.f,
+                                                                            /*offset_t =*/0.f,
+                                                                            /*width_t =*/0.f,
+                                                                            0,
+                                                                            0};
+                auto& drawableUniforms = drawable.mutableUniformBuffers();
+                drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
+                drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+
+#if !MLN_RENDER_BACKEND_VULKAN
+                drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
+
+                // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
+                assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
+
+                const LineExpressionUBO exprUBO = {
+                    /* color = */ nullptr,
+                    /* blur = */ nullptr,
+                    /* opacity = */ nullptr,
+                    /* gapwidth = */ nullptr,
+                    /* offset = */ nullptr,
+                    /* width = */ nullptr,
+                    /* floorWidth = */ nullptr,
+                };
+                drawableUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, parameters.context);
+#endif
+            };
+
+        private:
+            shaders::LineEvaluatedPropsUBO linePropertiesUBO;
+        };
+
         GeometryCoordinates coords{{0, 0}, {util::EXTENT, 0}, {util::EXTENT, util::EXTENT}, {0, util::EXTENT}, {0, 0}};
         gfx::PolylineGeneratorOptions options;
         options.type = FeatureType::Polygon;
