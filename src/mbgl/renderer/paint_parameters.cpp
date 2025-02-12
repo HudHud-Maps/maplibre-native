@@ -89,9 +89,9 @@ mat4 PaintParameters::matrixForTile(const UnwrappedTileID& tileID, bool aligned)
 }
 
 gfx::DepthMode PaintParameters::depthModeForSublayer([[maybe_unused]] uint8_t n, gfx::DepthMaskType mask) const {
-    if (currentLayer < opaquePassCutoff) {
-        return gfx::DepthMode::disabled();
-    }
+    //    if (currentLayer < opaquePassCutoff) {
+    //        return gfx::DepthMode::disabled();
+    //    }
 
 #if MLN_RENDER_BACKEND_OPENGL
     float depth = depthRangeSize + ((1 + currentLayer) * numSublayers + n) * depthEpsilon;

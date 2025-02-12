@@ -64,9 +64,9 @@ void LayerTweaker::multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
     if (!drawable.getIs3D() && drawable.getEnableDepth()) {
         // copy and adjust the projection matrix
         mat4 projMatrix = projMatrixRef;
-        projMatrix[14] -= ((1 + parameters.currentLayer) * PaintParameters::numSublayers -
-                           drawable.getSubLayerIndex()) *
-                          PaintParameters::depthEpsilon;
+        // projMatrix[14] -= ((1 + parameters.currentLayer) * PaintParameters::numSublayers -
+        //                    drawable.getSubLayerIndex()) *
+        //                   PaintParameters::depthEpsilon;
         // multiply with the copy
         matrix::multiply(matrix, projMatrix, matrix);
         // early return
