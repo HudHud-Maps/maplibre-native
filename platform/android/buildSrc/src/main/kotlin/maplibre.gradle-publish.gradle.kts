@@ -43,46 +43,64 @@ project.logger.lifecycle(project.extra["versionName"].toString())
 version = project.extra["versionName"] as String
 group = project.extra["mapLibreArtifactGroupId"] as String
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                groupId = this@afterEvaluate.group.toString()
-                artifactId = project.extra["mapLibreArtifactId"].toString()
-                version = this@afterEvaluate.version.toString()
+fun PublishingExtension.configureMavenPublication(
+    renderer: String,
+    publicationName: String,
+    artifactIdPostfix: String,
+    descriptionPostfix: String,
+) {
+    publications {
+        create<MavenPublication>(publicationName) {
+            groupId = project.group.toString()
+            artifactId = "${project.extra["mapLibreArtifactId"]}$artifactIdPostfix"
+            version = project.version.toString()
 
-                // Conditional component selection based on environment variable
-                from(components[if (System.getenv("RENDERER")?.lowercase() == "vulkan") "vulkanRelease" else "drawableRelease"])
+            from(components["${renderer}Release"])
 
-                pom {
-                    name.set(project.extra["mapLibreArtifactTitle"].toString())
-                    description.set(project.extra["mapLibreArtifactTitle"].toString())
+            pom {
+                name.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")
+                description.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")
+                url.set(project.extra["mapLibreArtifactUrl"].toString())
+                licenses {
+                    license {
+                        name.set(project.extra["mapLibreArtifactLicenseName"].toString())
+                        url.set(project.extra["mapLibreArtifactLicenseUrl"].toString())
+                    }
+                }
+                developers {
+                    developer {
+                        id.set(project.extra["mapLibreDeveloperId"].toString())
+                        name.set(project.extra["mapLibreDeveloperName"].toString())
+                        email.set("team@maplibre.org")
+                    }
+                }
+                scm {
+                    connection.set(project.extra["mapLibreArtifactScmUrl"].toString())
+                    developerConnection.set(project.extra["mapLibreArtifactScmUrl"].toString())
                     url.set(project.extra["mapLibreArtifactUrl"].toString())
-                    licenses {
-                        license {
-                            name.set(project.extra["mapLibreArtifactLicenseName"].toString())
-                            url.set(project.extra["mapLibreArtifactLicenseUrl"].toString())
-                        }
-                    }
-                    developers {
-                        developer {
-                            id.set(project.extra["mapLibreDeveloperId"].toString())
-                            name.set(project.extra["mapLibreDeveloperName"].toString())
-                            email.set("maplibre@maplibre.org")
-                        }
-                    }
-                    scm {
-                        connection.set(project.extra["mapLibreArtifactScmUrl"].toString())
-                        developerConnection.set(project.extra["mapLibreArtifactScmUrl"].toString())
-                        url.set(project.extra["mapLibreArtifactUrl"].toString())
-                    }
                 }
             }
         }
     }
-
 }
 
+afterEvaluate {
+    publishing {
+        configureMavenPublication("drawable", "opengl", "", "")
+        configureMavenPublication("vulkan", "vulkan", "-vulkan", "(Vulkan)")
+
+        repositories {
+            maven {
+                name = "GithubPackages"
+                url = uri("https://maven.pkg.github.com/HudHud-Maps/maplibre-native")
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR")
+                    password = System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
+    }
+}
 
 afterEvaluate {
     android.libraryVariants.forEach { variant ->
@@ -94,6 +112,6 @@ afterEvaluate {
     }
 }
 
-signing {
-    sign(publishing.publications)
-}
+// signing {
+//     sign(publishing.publications)
+// }
