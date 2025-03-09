@@ -6,6 +6,12 @@
 
 ### 🐞 Bug fixes
 
+## 11.6.2
+
+### Features and Improvements
+
+- Add LoD Support
+
 ## 11.6.1
 
 ### 🐞 Bug fixes
