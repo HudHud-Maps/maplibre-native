@@ -1,6 +1,7 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load(
     "//bazel:core.bzl",
     "MLN_CORE_HEADERS",

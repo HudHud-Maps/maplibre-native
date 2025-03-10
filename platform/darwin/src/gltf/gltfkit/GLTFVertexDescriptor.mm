@@ -53,7 +53,7 @@ NSString *const GLTFAttributeSemanticMetallic  = @"METALLIC";
             [mutableAttributes addObject: [GLTFVertexAttribute new]];
         }
         _attributes = [mutableAttributes copy];
-        
+
         NSMutableArray *mutableLayouts = [NSMutableArray arrayWithCapacity:GLTFVertexDescriptorMaxBufferLayoutCount];
         for (int i = 0; i < GLTFVertexDescriptorMaxBufferLayoutCount; ++i) {
             [mutableLayouts addObject: [GLTFBufferLayout new]];

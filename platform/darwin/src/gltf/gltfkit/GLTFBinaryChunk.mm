@@ -20,4 +20,3 @@ const UInt32 GLTFBinaryMagic = 0x46546C67;
 
 @implementation GLTFBinaryChunk
 @end
-

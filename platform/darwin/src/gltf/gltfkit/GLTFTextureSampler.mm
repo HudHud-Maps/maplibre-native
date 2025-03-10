@@ -32,7 +32,7 @@
     if (![other isKindOfClass:[GLTFTextureSampler class]]) {
         return NO;
     }
-    
+
     GLTFTextureSampler *otherSampler = (GLTFTextureSampler *)other;
     BOOL areEqual =
         (otherSampler.magFilter == self.magFilter) &&
@@ -57,4 +57,3 @@
 }
 
 @end
-

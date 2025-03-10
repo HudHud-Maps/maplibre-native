@@ -93,7 +93,7 @@
     if (self.localTransformIsDirty) {
         [self computeLocalTransform];
     }
-    
+
     return _localTransform;
 }
 
@@ -104,12 +104,12 @@
     translationMatrix.columns[3][2] = _translation[2];
 
     simd_float4x4 rotationMatrix = simd_matrix4x4(_rotationQuaternion);
-    
+
     simd_float4x4 scaleMatrix = matrix_identity_float4x4;
     scaleMatrix.columns[0][0] = _scale[0];
     scaleMatrix.columns[1][1] = _scale[1];
     scaleMatrix.columns[2][2] = _scale[2];
-    
+
     _localTransform = matrix_multiply(matrix_multiply(translationMatrix, rotationMatrix), scaleMatrix);
     _localTransformDirty = NO;
 }
@@ -120,7 +120,7 @@
 
 - (GLTFBoundingBox)_approximateBoundsRecursive:(simd_float4x4)transform {
     GLTFBoundingBox bounds = { 0, 0 };
-    
+
     if (self.mesh != nil) {
         for (GLTFSubmesh *submesh in self.mesh.submeshes) {
             GLTFBoundingBox submeshBounds = { 0, 0 };
@@ -135,16 +135,16 @@
             GLTFBoundingBoxUnion(&bounds, submeshBounds);
         }
     }
-    
+
     simd_float4x4 globalTransform = matrix_multiply(transform, self.localTransform);
-    
+
     GLTFBoundingBoxTransform(&bounds, globalTransform);
-    
+
     for (GLTFNode *child in self.children) {
         GLTFBoundingBox childBounds = [child _approximateBoundsRecursive:globalTransform];
         GLTFBoundingBoxUnion(&bounds, childBounds);
     }
-    
+
     return bounds;
 }
 

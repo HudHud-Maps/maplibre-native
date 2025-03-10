@@ -113,7 +113,7 @@ void main() {
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
-        
+
 #ifndef HAS_UNIFORM_u_width
     mediump float width = unpack_mix_float(in_width, interp.width_t);
 #else
@@ -216,7 +216,7 @@ void main() {
 #else
     lowp float blur = frag_blur;
 #endif
-        
+
 #ifdef HAS_UNIFORM_u_opacity
     lowp float opacity = props.opacity;
 #else
@@ -333,7 +333,7 @@ void main() {
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
-        
+
 #ifndef HAS_UNIFORM_u_width
     mediump float width = unpack_mix_float(in_width, interp.width_t);
 #else
@@ -430,7 +430,7 @@ void main() {
 #else
     lowp float blur = frag_blur;
 #endif
-        
+
 #ifdef HAS_UNIFORM_u_opacity
     lowp float opacity = props.opacity;
 #else
@@ -575,7 +575,7 @@ void main() {
 #else
     const lowp float offset = props.offset * -1.0;
 #endif
-        
+
 #ifndef HAS_UNIFORM_u_width
     mediump float width = unpack_mix_float(in_width, interp.width_t);
 #else
@@ -702,7 +702,7 @@ void main() {
 #else
     const lowp float blur = frag_blur;
 #endif
-        
+
 #ifdef HAS_UNIFORM_u_opacity
     const lowp float opacity = props.opacity;
 #else
@@ -1036,7 +1036,7 @@ void main() {
 #else
     const lowp float blur = frag_blur;
 #endif
-        
+
 #ifdef HAS_UNIFORM_u_opacity
     const lowp float opacity = props.opacity;
 #else

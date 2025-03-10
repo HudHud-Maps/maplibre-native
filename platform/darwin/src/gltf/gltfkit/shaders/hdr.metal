@@ -49,7 +49,7 @@ fragment half4 tonemap_fragment_main(FragmentIn in [[stage_in]],
     // Original, pre-alpha
 //    half3 color = sourceTexture.sample(linearSampler, in.texCoords).rgb;
 //    return half4(reinhardToneMapping(color), 1);
-    
+
     half4 color = sourceTexture.sample(linearSampler, in.texCoords);
     return half4(reinhardToneMapping(color.rgb), color.a);
 
@@ -120,4 +120,3 @@ fragment half4 additive_blend_fragment_main(FragmentIn in [[stage_in]],
     half4 color = sourceTexture.sample(linearSampler, in.texCoords);
     return color;
 }
-

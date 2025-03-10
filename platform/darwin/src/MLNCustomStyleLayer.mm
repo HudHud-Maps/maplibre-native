@@ -235,4 +235,3 @@ MLNStyleLayer* CustomStyleLayerPeerFactory::createPeer(style::Layer* rawLayer) {
 }
 
 }  // namespace mbgl
-

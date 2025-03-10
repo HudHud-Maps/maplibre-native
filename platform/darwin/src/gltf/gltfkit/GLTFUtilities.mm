@@ -24,7 +24,7 @@ bool GLTFBoundingBoxIsEmpty(GLTFBoundingBox b) {
 GLTFBoundingBox *GLTFBoundingBoxUnion(GLTFBoundingBox *a, GLTFBoundingBox b) {
     bool leftEmpty = GLTFBoundingBoxIsEmpty(*a);
     bool rightEmpty = GLTFBoundingBoxIsEmpty(b);
-    
+
     if (leftEmpty) {
         if (!rightEmpty) {
             *a = b;
@@ -37,7 +37,7 @@ GLTFBoundingBox *GLTFBoundingBoxUnion(GLTFBoundingBox *a, GLTFBoundingBox b) {
         if (b.maxPoint.y > a->maxPoint.y) { a->maxPoint.y = b.maxPoint.y; }
         if (b.maxPoint.z > a->maxPoint.z) { a->maxPoint.z = b.maxPoint.z; }
     }
-    
+
     return a;
 }
 
@@ -50,7 +50,7 @@ void GLTFBoundingBoxTransform(GLTFBoundingBox *b, simd_float4x4 transform) {
     simd_float4 rtb = (simd_float4) { b->maxPoint.x, b->maxPoint.y, b->minPoint.z, 1 };
     simd_float4 lbb = (simd_float4) { b->minPoint.x, b->minPoint.y, b->minPoint.z, 1 };
     simd_float4 rbb = (simd_float4) { b->maxPoint.x, b->minPoint.y, b->minPoint.z, 1 };
-    
+
     ltf = matrix_multiply(transform, ltf);
     rtf = matrix_multiply(transform, rtf);
     lbf = matrix_multiply(transform, lbf);
@@ -59,7 +59,7 @@ void GLTFBoundingBoxTransform(GLTFBoundingBox *b, simd_float4x4 transform) {
     rtb = matrix_multiply(transform, rtb);
     lbb = matrix_multiply(transform, lbb);
     rbb = matrix_multiply(transform, rbb);
-    
+
     b->minPoint.x = fmin(fmin(fmin(fmin(fmin(fmin(fmin(ltf.x, rtf.x), lbf.x), rbf.x), ltb.x), rtb.x), lbb.x), rbb.x);
     b->minPoint.y = fmin(fmin(fmin(fmin(fmin(fmin(fmin(ltf.y, rtf.y), lbf.y), rbf.y), ltb.y), rtb.y), lbb.y), rbb.y);
     b->minPoint.z = fmin(fmin(fmin(fmin(fmin(fmin(fmin(ltf.z, rtf.z), lbf.z), rbf.z), ltb.z), rtb.z), lbb.z), rbb.z);
@@ -77,7 +77,7 @@ GLTFQuaternion GLTFQuaternionFromEulerAngles(float pitch, float yaw, float roll)
     float sy = sin(yaw / 2);
     float cz = cos(roll / 2);
     float sz = sin(roll / 2);
-    
+
     GLTFQuaternion q = simd_quaternion(
         sx*cy*cz + cx*sy*sz,
         cx*sy*cz + sx*cy*sz,
@@ -115,12 +115,12 @@ GLTFDataDimension GLTFDataDimensionForName(NSString *name) {
     } else if ([name isEqualToString:@"MAT4"]) {
         return GLTFDataDimensionMatrix4x4;
     }
-    
+
     return GLTFDataDimensionUnknown;
 }
 
 size_t GLTFSizeOfDataType(GLTFDataType type) {
-    
+
     switch (type) {
         case GLTFDataTypeChar:      return sizeof(char);
         case GLTFDataTypeUChar:     return sizeof(unsigned char);

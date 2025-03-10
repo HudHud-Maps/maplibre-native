@@ -79,36 +79,36 @@
         GLTFNode *target = channel.targetNode;
         NSString *path = channel.targetPath;
         GLTFAnimationSampler *sampler = channel.sampler;
-        
+
         int keyFrameCount = sampler.keyFrameCount;
-        
+
         const float *timeValues = (const float*)sampler.inputValues;
-        
+
         float minTime = timeValues[0];
         float maxTime = timeValues[keyFrameCount - 1];
 
         if (time < minTime || time > maxTime) {
             continue;
         }
-        
+
         int previousKeyFrame = 0, nextKeyFrame = 1;
         while (timeValues[nextKeyFrame] < time) {
             ++previousKeyFrame;
             ++nextKeyFrame;
         }
-        
+
         if (previousKeyFrame >= keyFrameCount) {
             previousKeyFrame = 0;
         }
-        
+
         if (nextKeyFrame >= keyFrameCount) {
             nextKeyFrame = 0;
         }
-        
+
         float frameTimeDelta = timeValues[nextKeyFrame] - timeValues[previousKeyFrame];
         float timeWithinFrame = time - timeValues[previousKeyFrame];
         float frameProgress = timeWithinFrame / frameTimeDelta;
-        
+
         if ([path isEqualToString:@"rotation"]) {
             if(sampler.outputAccessor.componentType != GLTFDataTypeFloat) {
                 static dispatch_once_t floatRotationsNonce;
@@ -117,7 +117,7 @@
                 });
             }
             const GLTFQuaternion *rotationValues = (const GLTFQuaternion*)sampler.outputValues;
-            
+
             GLTFQuaternion previousRotation = rotationValues[previousKeyFrame];
             GLTFQuaternion nextRotation = rotationValues[nextKeyFrame];
             GLTFQuaternion interpRotation = simd_slerp(previousRotation, nextRotation, frameProgress);
@@ -125,7 +125,7 @@
             target.rotationQuaternion = interpRotation;
         } else if ([path isEqualToString:@"translation"]) {
             const GLTFVector3 *translationValues = (const GLTFVector3*)sampler.outputValues;
-            
+
             GLTFVector3 previousTranslation = translationValues[previousKeyFrame];
             GLTFVector3 nextTranslation = translationValues[nextKeyFrame];
 
@@ -138,12 +138,12 @@
             target.translation = (simd_float3){ interpTranslation.x, interpTranslation.y, interpTranslation.z };
         } else if ([path isEqualToString:@"scale"]) {
             const float *scaleValues = (const float*)sampler.outputValues;
-            
+
             float previousScale = scaleValues[previousKeyFrame];
             float nextScale = scaleValues[nextKeyFrame];
-            
+
             float interpScale = ((1 - frameProgress) * previousScale) + (frameProgress * nextScale);
-            
+
             target.scale = (simd_float3)interpScale;
         } else if ([path isEqualToString:@"weights"]) {
             if(sampler.outputAccessor.componentType != GLTFDataTypeFloat) {
@@ -153,12 +153,12 @@
                 });
             }
             const float *weightValues = (const float*)sampler.outputValues;
-            
+
             long weightCount = sampler.outputAccessor.count / keyFrameCount;
-            
+
             const float *previousWeights = weightValues + (previousKeyFrame * weightCount);
             const float *nextWeights = weightValues + (nextKeyFrame * weightCount);
-            
+
             NSMutableArray *interpWeights = [NSMutableArray array];
             for (int i = 0; i < weightCount; ++i) {
                 float interpWeight = ((1 - frameProgress) * previousWeights[i]) + (frameProgress * nextWeights[i]);

@@ -10,7 +10,7 @@
 #import "gltfkit/GLTFMTLBufferAllocator.h"
 
 @interface GLTFModelLoader () <GLTFAssetLoadingDelegate> {
-    
+
 }
 
 @property GLTFModelLoaderCompletionHandler completionHandler;
@@ -22,12 +22,12 @@
 -(void)loadURL:(NSURL *)assetURL
 withCompletionHandler:(GLTFModelLoaderCompletionHandler)completionHandler
 bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator {
-    
+
     self.completionHandler = completionHandler;
     [GLTFAsset loadAssetWithURL:assetURL
                 bufferAllocator:bufferAllocator
                        delegate:self];
-    
+
 }
 
 
@@ -38,12 +38,12 @@ bufferAllocator:(id<GLTFBufferAllocator>)bufferAllocator {
 - (void)assetWithURL:(nonnull NSURL *)assetURL
     didFinishLoading:(nonnull GLTFAsset *)asset {
     dispatch_async(dispatch_get_main_queue(), ^{
-        
+
         if (self.completionHandler) {
             self.completionHandler(asset);
         }
         self.completionHandler = nil;
-        
+
         NSLog(@"INFO: Total live buffer allocation size after document load is %0.2f MB", ([GLTFMTLBufferAllocator liveAllocationSize] / (float)1e6));
     });
 }

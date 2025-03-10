@@ -50,9 +50,9 @@ static float3 ImportanceSampleGGX(float2 xi, float3 N, float roughness) {
     float phi = 2 * M_PI_F * xi.x;
     float cosTheta = sqrt((1 - xi.y) / (1 + (a * a - 1) * xi.y));
     float sinTheta = sqrt(1 - cosTheta * cosTheta);
-    
+
     float3 H(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
-    
+
     float3 up = fabs(N.z) < 0.999 ? float3(0, 0, 1) : float3(1, 0, 0);
     float3 tangent = normalize(cross(up, N));
     float3 bitangent = cross(N, tangent);
@@ -71,11 +71,11 @@ static float2 IntegrateBRDF(float roughness, float NdotV) {
         float2 x = Hammersley(i, sampleCount);
         float3 H = ImportanceSampleGGX(x, N, roughness);
         float3 L = normalize(2 * dot(V, H) * H - V);
-        
+
         float NdotL = saturate(L.z);
         float NdotH = saturate(H.z);
         float VdotH = saturate(dot(V, H));
-        
+
         if(NdotL > 0) {
             float G = GeometrySmith(NdotL, NdotV, roughness);
             float G_Vis = G * VdotH / (NdotH * NdotV);
@@ -122,7 +122,7 @@ static float3 CubeDirectionFromUVAndFace(float2 uv, int face) {
         case 5:
             dir = float3( u,  v, -1); break; // -Z
     }
-    
+
     dir = normalize(dir);
     return dir;
 }
@@ -146,7 +146,7 @@ kernel void equirect_to_cube(texture2d<half, access::sample> equirectangularMap,
 static float3 ComputeIrradiance(float3 N, texturecube<half, access::sample> environmentTexture) {
     constexpr sampler cubeSampler(coord::normalized, filter::linear);
     float3 irradiance = float3(0.0);
-    
+
     float3 up(0.0, 1.0, 0.0);
     float3 right = cross(up, N);
     up = cross(N, right);
@@ -185,10 +185,10 @@ kernel void compute_irradiance(texturecube<half, access::sample> environmentMap,
 
 static float3 PrefilterEnvMap(float roughness, float3 R, texturecube<half, access::sample> environmentTexture) {
     constexpr sampler cubeSampler(coord::normalized, filter::linear, mip_filter::linear);
-    
+
     float3 N = R;
     float3 V = R;
-    
+
     float3 prefilteredColor(0);
     float totalWeight = 0;
     float resolution = environmentTexture.get_width();

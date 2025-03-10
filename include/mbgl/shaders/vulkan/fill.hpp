@@ -292,9 +292,9 @@ void main() {
     frag_opacity = unpack_mix_float(in_opacity, interp.opacity_t);
 #endif
 
-    const vec2 pattern_tl_a = frag_pattern_from.xy; 
-    const vec2 pattern_br_a = frag_pattern_from.zw; 
-    const vec2 pattern_tl_b = frag_pattern_to.xy; 
+    const vec2 pattern_tl_a = frag_pattern_from.xy;
+    const vec2 pattern_br_a = frag_pattern_from.zw;
+    const vec2 pattern_tl_b = frag_pattern_to.xy;
     const vec2 pattern_br_b = frag_pattern_to.zw;
 
     const float pixelRatio = global.pixel_ratio;
@@ -488,9 +488,9 @@ void main() {
     frag_opacity = unpack_mix_float(in_opacity, interp.opacity_t);
 #endif
 
-    const vec2 pattern_tl_a = frag_pattern_from.xy; 
-    const vec2 pattern_br_a = frag_pattern_from.zw; 
-    const vec2 pattern_tl_b = frag_pattern_to.xy; 
+    const vec2 pattern_tl_a = frag_pattern_from.xy;
+    const vec2 pattern_br_a = frag_pattern_from.zw;
+    const vec2 pattern_tl_b = frag_pattern_to.xy;
     const vec2 pattern_br_b = frag_pattern_to.zw;
 
     const float pixelRatio = global.pixel_ratio;
@@ -979,7 +979,7 @@ void main() {
     const vec2 pos = normal.x == 1.0 && normal.y == 0.0 && normal.z == 16384.0
         ? vec2(in_position) // extrusion top
         : vec2(edgedistance, z * drawable.height_factor); // extrusion side
-    
+
     vec4 lighting = vec4(0.0, 0.0, 0.0, 1.0);
     float directional = clamp(dot(normal / 16383.0, props.light_position_base.xyz), 0.0, 1.0);
     directional = mix((1.0 - props.light_intensity), max((0.5 + props.light_intensity), 1.0), directional);

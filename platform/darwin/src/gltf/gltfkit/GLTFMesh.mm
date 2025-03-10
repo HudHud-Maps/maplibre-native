@@ -62,7 +62,7 @@
         }];
         self.cachedVertexDescriptor = descriptor;
     }
-    
+
     return self.cachedVertexDescriptor;
 }
 

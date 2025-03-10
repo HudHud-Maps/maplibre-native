@@ -28,7 +28,7 @@ MTLPrimitiveType GLTFMTLPrimitiveTypeForPrimitiveType(GLTFPrimitiveType gltfType
             return MTLPrimitiveTypeTriangle;
         case GLTFPrimitiveTypeTriangleStrip:
             return MTLPrimitiveTypeTriangleStrip;
-            
+
         // Not supported; need to duplicate first element and restitch into tri strip, respectively
         case GLTFPrimitiveTypeLineLoop:
         case GLTFPrimitiveTypeTriangleFan:
@@ -161,7 +161,7 @@ NSString *GLTFMTLTypeNameForType(GLTFDataType baseType, GLTFDataDimension dimens
     NSString *typeName = @"float";
     NSString *packingPrefix = @"";
     NSString *dimensionSuffix = @"";
-    
+
     if (packed && (dimension != GLTFDataDimensionScalar)) {
         packingPrefix = @"packed_";
     }
@@ -179,7 +179,7 @@ NSString *GLTFMTLTypeNameForType(GLTFDataType baseType, GLTFDataDimension dimens
         default:
             return @"__UNKNOWN_TYPE__";
     }
-    
+
     switch (dimension) {
         case GLTFDataDimensionScalar:    dimensionSuffix = @"";         break;
         case GLTFDataDimensionVector2:   dimensionSuffix = @"2";        break;
@@ -191,7 +191,7 @@ NSString *GLTFMTLTypeNameForType(GLTFDataType baseType, GLTFDataDimension dimens
         default:
             return @"__UNKNOWN_TYPE__";
     }
-    
+
     return [NSString stringWithFormat:@"%@%@%@", packingPrefix, typeName, dimensionSuffix];
 }
 
@@ -284,8 +284,6 @@ MTLVertexFormat GLTFMTLVertexFormatForComponentTypeAndDimension(GLTFDataType bas
         default:
             break;
     }
-    
+
     return MTLVertexFormatInvalid;
 }
-
-

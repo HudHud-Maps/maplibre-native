@@ -35,7 +35,7 @@
     if (node.parent) {
         [node removeFromParent];
     }
-    
+
     [_mutableNodes addObject:node];
 }
 

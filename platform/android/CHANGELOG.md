@@ -107,7 +107,7 @@
 
 ### ✨ Features and improvements
 
-- Toggle tile cache final API ([#2723](https://github.com/maplibre/maplibre-native/pull/2723)).  
+- Toggle tile cache final API ([#2723](https://github.com/maplibre/maplibre-native/pull/2723)).
     This is a new API on `MapLibreMap`: `setTileCacheEnabled()` and `getTileCacheEnabled()`. This tile cache is used to cache tiles on different zoom levels, disabling it will reduce memory usage.
 - Add `getOfflineRegion` Kotlin API ([#2516](https://github.com/maplibre/maplibre-native/pull/2516)). This is the first (code) contribution from [@JRWilding](https://github.com/JRWilding)! 🎉
 - Bump NDK version to 27.0.12077973, replace `ALooper_pollAll` with `ALooper_pollOnce` ([#2663](https://github.com/maplibre/maplibre-native/pull/2663)).
@@ -116,8 +116,8 @@
 - Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
 - Update Android Dependencies, use [maplibre-gestures-android](https://github.com/maplibre/maplibre-gestures-android) ([#2714](https://github.com/maplibre/maplibre-native/pull/2714)).
 - Update dependency gradle to v8.10 ([#2721](https://github.com/maplibre/maplibre-native/pull/2721)).
-- Cleanup `mbgl/actor/mailbox*` implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)). 
-- Use latest MapLibre Style Spec ([#2756](https://github.com/maplibre/maplibre-native/pull/2756)).  
+- Cleanup `mbgl/actor/mailbox*` implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
+- Use latest MapLibre Style Spec ([#2756](https://github.com/maplibre/maplibre-native/pull/2756)).
   This PR adds two new APIs to `TransitionOptions` of `LocationIndicatorLayer`: `getBearingTransition()` and `setBearingTransition()`.
 - Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
 
@@ -126,7 +126,7 @@
 - Fix crash when feature contains invalid UTF-8 data ([#2693](https://github.com/maplibre/maplibre-native/pull/2693)).
 - Fix accidental regression conditional layer evaluation ([#2705](https://github.com/maplibre/maplibre-native/pull/2705)).
 - Ensure `ReentrantLock` is unlocked after being locked, and on same thread ([#2759](https://github.com/maplibre/maplibre-native/pull/2759)). This is the first (code) contributon from [@westnordost](https://github.com/westnordost)! 🎉
-- Add guard blocks and checks to `SymbolInstance` ([#2744](https://github.com/maplibre/maplibre-native/pull/2744)).  
+- Add guard blocks and checks to `SymbolInstance` ([#2744](https://github.com/maplibre/maplibre-native/pull/2744)).
   This fixes an exceedingly rare crash that a user is seeing in the field. The fix is not pretty, but we hope to better understand the problem in the future (see [this open issue](https://github.com/maplibre/maplibre-native/issues/2350)).
 
 ## 11.1.0
@@ -176,12 +176,12 @@ This release utilizes **OpenGL ES 3.0**. As a result, some older devices are no 
 
 - 💥 Breaking: Change package of all classes from `com.mapbox.mapboxsdk` to `org.maplibre.android` ([#1201](https://github.com/maplibre/maplibre-native/pull/1201)). This means you will need to fix your imports.
 
-  > To migrate:  
+  > To migrate:
   > In your imports in each of your project files, replace `com.mapbox.mapboxsdk.` with `org.maplibre.android.*`.
 
 - 💥 Breaking: Rename several classes to no longer contain the word "Mapbox". You will need to migrate by renaming references.
 
-  > To migrate:  
+  > To migrate:
   > Each affected occurrence will be marked as an error during compilation. Replace each occurrence of "Mapbox" with "MapLibre" and let your IDE do the import.
   >
   > These are the most important classes that have been renamed:
@@ -251,7 +251,7 @@ This version is identical to 10.0.2.
 
 - 💥 Breaking: Changed resourcePrefix to `maplibre_` from `mapbox_` ([#647](https://github.com/maplibre/maplibre-native/pull/647)) and renamed resources accordingly. Note that this is a breaking change since the names of public resources were renamed as well. Replaced Mapbox logo with MapLibre logo.
 
-  > To migrate:  
+  > To migrate:
   > If you use any of the public Android resources, you will get an error that they can not be found. Replace the prefix of each, e.g. `R.style.mapbox_LocationComponent` -> `R.style.maplibre_LocationComponent`.
 
 - 💥 Breaking: several deprecated overloads of `LocationComponent.activateLocationComponent` were removed. Use `LocationComponentActivationOptions.Builder` instead.
@@ -271,7 +271,7 @@ This version is identical to 10.0.2.
 
 - 💥 Breaking: the `LocationEngine` implemented with Google Location Services has been removed to make MapLibre Native for Android fully FLOSS ([#379](https://github.com/maplibre/maplibre-native/issues/379)).
 
-  > To migrate:  
+  > To migrate:
   > Include the source code of the removed [`GoogleLocationEngineImpl`](https://github.com/maplibre/maplibre-native/blob/4a34caab7593f4f1b6d8c09c06a5e25d7c6cfc43/platform/android/MapLibreAndroid/src/main/java/com/mapbox/mapboxsdk/location/engine/GoogleLocationEngineImpl.java) in your source tree.
   >
   > Pass an instance of `LocationEngine` based on `GoogleLocationEngineImpl` to `LocationComponentActivationOptions.Builder.locationEngine` (this was done in a now removed [`LocationEngineProvider`](https://github.com/maplibre/maplibre-native/blob/68d58d6f6f453d5c6cc0fa92fcc6c6cfe0cf967f/platform/android/MapLibreAndroid/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineProvider.java#L59) class):

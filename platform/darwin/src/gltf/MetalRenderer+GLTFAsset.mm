@@ -26,10 +26,10 @@ using namespace maplibre::gltf;
 
 // Encapsulated in GLTFRenderer+GLTFAsset
 void MetalRenderer::setGLTFAsset(GLTFAsset *asset, std::shared_ptr<GLTFModel> model) {
-    
+
     _models.clear();
     addGLTFAsset(asset, model);
-    
+
 //    _asset = asset;
 //    if (_asset != nullptr) {
 //        computeRegularizationMatrix();
@@ -37,19 +37,19 @@ void MetalRenderer::setGLTFAsset(GLTFAsset *asset, std::shared_ptr<GLTFModel> mo
 //        addDefaultLights();
 //    }
 
-    
+
 }
 
 //
 void MetalRenderer::addGLTFAsset(GLTFAsset *asset, std::shared_ptr<GLTFModel> model) {
-    
+
     auto m = createRenderModel(asset, model);
     _models.push_back(m);
-    
+
 }
 
 std::shared_ptr<GLTFRenderModel> MetalRenderer::createRenderModel(GLTFAsset *asset, std::shared_ptr<GLTFModel> model) {
-    
+
     std::shared_ptr<GLTFRenderModel> tempResult = std::make_shared<GLTFRenderModel>();
     tempResult->_asset = asset;
     tempResult->_gltfModel = model;
@@ -61,7 +61,7 @@ std::shared_ptr<GLTFRenderModel> MetalRenderer::createRenderModel(GLTFAsset *ass
     addDefaultLights(tempResult);
 
     return tempResult;
-    
+
 }
 
 
@@ -88,14 +88,14 @@ void MetalRenderer::computeRegularizationMatrix(std::shared_ptr<GLTFRenderModel>
     float scale = (bounds.radius > 0) ? (1 / (bounds.radius)) : 1;
     simd_double4x4 centerScale = GLTFMatrixFromUniformScaleD(scale);
     simd_double4x4 centerTranslation = GLTFMatrixFromTranslationD(-bounds.center);
-    
+
     // This regularization matrix centers the model
     model->_regularizationMatrix = matrix_multiply(centerScale, centerTranslation);
-    
-    
+
+
     // The regularization matrix just scales it to show in the viewport
     model->_regularizationMatrix = centerScale;
-    
+
 }
 
 void MetalRenderer::computeTransforms(std::shared_ptr<GLTFRenderModel> model) {
@@ -105,7 +105,7 @@ void MetalRenderer::computeTransforms(std::shared_ptr<GLTFRenderModel> model) {
     // Rotation
     auto modelRotation = GLTFRotationMatrixFromAxisAngleD(GLTFAxisYD, (model->_gltfModel->_rotationDeg) * DEG_RAD);
     auto modelRotated = matrix_multiply(modelRotation, mdlMatrix);
-    
+
     // Tilt
     auto modelTilted = GLTFRotationMatrixFromAxisAngleD(GLTFAxisXD, 90 * DEG_RAD);
     modelTilted = matrix_multiply(modelTilted, modelRotated);
@@ -113,7 +113,7 @@ void MetalRenderer::computeTransforms(std::shared_ptr<GLTFRenderModel> model) {
     simd_double3 xlateVector = simd_make_double3(model->_gltfModel->_xLateX,
                                                     model->_gltfModel->_xLateY,
                                                     model->_gltfModel->_xLateZ);
-    
+
     auto xLateMatrix = GLTFMatrixFromTranslationD(xlateVector);
 
     auto modelTranslated = matrix_multiply(xLateMatrix, modelTilted);
@@ -129,7 +129,7 @@ void MetalRenderer::renderScene(std::shared_ptr<GLTFRenderModel> model,
                                 GLTFScene *scene,
                                 id<MTLCommandBuffer> commandBuffer,
                                 id<MTLRenderCommandEncoder> renderEncoder) {
-    
+
     if (scene == nil) {
         return;
     }
@@ -147,17 +147,17 @@ void MetalRenderer::renderScene(std::shared_ptr<GLTFRenderModel> model,
     for (GLTFNode *rootNode in scene.nodes) {
         buildLightListRecursive(rootNode);
     }
-    
+
     for (GLTFNode *rootNode in scene.nodes) {
         buildRenderListRecursive(model,
                                  rootNode, matrix_identity_float4x4, scene.ambientLight);
     }
-    
+
     NSMutableArray *renderList = [NSMutableArray arrayWithArray:_opaqueRenderItems];
     [renderList addObjectsFromArray:_transparentRenderItems];
-    
+
     drawRenderList(renderList, renderEncoder);
-    
+
     NSArray *copiedDeferredReusableBuffers = [_deferredReusableBuffers copy];
     [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -166,7 +166,7 @@ void MetalRenderer::renderScene(std::shared_ptr<GLTFRenderModel> model,
             }
         });
     }];
-    
+
     [_opaqueRenderItems removeAllObjects];
     [_transparentRenderItems removeAllObjects];
     [_currentLightNodes removeAllObjects];
@@ -227,7 +227,7 @@ void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> mo
     if (mesh) {
         for (GLTFSubmesh *submesh in mesh.submeshes) {
             GLTFMaterial *material = submesh.material;
-            
+
             simd_double3x3 viewAffine = simd_inverse(GLTFMatrixUpperLeft3x3D(model->_modelViewMatrix));
             simd_double3 cameraPos = model->_modelViewMatrix.columns[3].xyz;
             simd_double3 cameraWorldPos = matrix_multiply(viewAffine, -cameraPos);
@@ -256,7 +256,7 @@ void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> mo
             fragmentUniforms.camera = cameraWorldPosF;
             fragmentUniforms.alphaCutoff = material.alphaCutoff;
             fragmentUniforms.envIntensity = 2; // self.lightingEnvironment.intensity;
-            
+
             if (material.baseColorTexture != nil) {
                 fragmentUniforms.textureMatrices[GLTFTextureBindIndexBaseColor] = GLTFTextureMatrixFromTransform(material.baseColorTexture.transform);
             }
@@ -299,14 +299,14 @@ void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> mo
                 }
                 fragmentUniforms.lights[lightIndex].spotDirection = lightNode.globalTransform.columns[2];
             }
-            
+
             GLTFMTLRenderItem *item = [GLTFMTLRenderItem new];
             item.label = [NSString stringWithFormat:@"%@ - %@", node.name ?: @"Unnamed node", submesh.name ?: @"Unnamed primitive"];
             item.node = node;
             item.submesh = submesh;
             item.vertexUniforms = vertexUniforms;
             item.fragmentUniforms = fragmentUniforms;
-            
+
             if (submesh.material.alphaMode == GLTFAlphaModeBlend) {
                 [_transparentRenderItems addObject:item];
             } else {
@@ -314,7 +314,7 @@ void MetalRenderer::buildRenderListRecursive(std::shared_ptr<GLTFRenderModel> mo
             }
         }
     }
-    
+
     for (GLTFNode *childNode in node.children) {
         buildRenderListRecursive(model,
                                  childNode, modelMatrix, defaultAmbientLight);
@@ -328,49 +328,49 @@ void MetalRenderer::drawRenderList(NSArray<GLTFMTLRenderItem *> *renderList,
         GLTFNode *node = item.node;
         GLTFSubmesh *submesh = item.submesh;
         GLTFMaterial *material = submesh.material;
-        
+
         [renderEncoder pushDebugGroup:[NSString stringWithFormat:@"%@", item.label]];
-        
+
         id<MTLRenderPipelineState> renderPipelineState = renderPipelineStateForSubmesh(submesh);
-                
+
         [renderEncoder setRenderPipelineState:renderPipelineState];
-        
+
         [renderEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
 
         NSDictionary *accessorsForAttributes = submesh.accessorsForAttributes;
-                
+
         GLTFAccessor *indexAccessor = submesh.indexAccessor;
         BOOL useIndexBuffer = (indexAccessor != nil);
-                
+
         // TODO: Check primitive type for unsupported types (tri fan, line loop), and modify draw calls as appropriate
         MTLPrimitiveType primitiveType = GLTFMTLPrimitiveTypeForPrimitiveType(submesh.primitiveType);
-        
+
         bindTexturesForMaterial(material, renderEncoder);
-        
+
         VertexUniforms vertexUniforms = item.vertexUniforms;
         [renderEncoder setVertexBytes:&vertexUniforms length:sizeof(vertexUniforms) atIndex:GLTFVertexDescriptorMaxAttributeCount + 0];
-        
+
         if (node.skin != nil && node.skin.jointNodes != nil && node.skin.jointNodes.count > 0) {
             id<MTLBuffer> jointBuffer = dequeueReusableBufferOfLength(node.skin.jointNodes.count * sizeof(simd_float4x4));
             computeJointsForSubmesh(submesh, node, jointBuffer);
             [renderEncoder setVertexBuffer:jointBuffer offset:0 atIndex:GLTFVertexDescriptorMaxAttributeCount + 1];
             [_deferredReusableBuffers addObject:jointBuffer];
         }
-        
+
         FragmentUniforms fragmentUniforms = item.fragmentUniforms;
         [renderEncoder setFragmentBytes:&fragmentUniforms length: sizeof(fragmentUniforms) atIndex: 0];
-                
+
         GLTFVertexDescriptor *vertexDescriptor = submesh.vertexDescriptor;
         for (int i = 0; i < GLTFVertexDescriptorMaxAttributeCount; ++i) {
             NSString *semantic = vertexDescriptor.attributes[i].semantic;
             if (semantic == nil) { continue; }
             GLTFAccessor *accessor = submesh.accessorsForAttributes[semantic];
-            
+
             [renderEncoder setVertexBuffer:((GLTFMTLBuffer *)accessor.bufferView.buffer).buffer
                                     offset:accessor.offset + accessor.bufferView.offset
                                    atIndex:i];
         }
-        
+
         if (material.alphaMode == GLTFAlphaModeBlend){
             id<MTLDepthStencilState> depthStencilState = depthStencilStateForDepthWriteEnabled(YES, YES, MTLCompareFunctionLess);
             [renderEncoder setDepthStencilState:depthStencilState];
@@ -378,18 +378,18 @@ void MetalRenderer::drawRenderList(NSArray<GLTFMTLRenderItem *> *renderList,
             id<MTLDepthStencilState> depthStencilState = depthStencilStateForDepthWriteEnabled(YES,YES,MTLCompareFunctionLess);
             [renderEncoder setDepthStencilState:depthStencilState];
         }
-        
+
         if (material.isDoubleSided) {
             [renderEncoder setCullMode:MTLCullModeNone];
         } else {
             [renderEncoder setCullMode:MTLCullModeBack];
         }
-        
+
         if (useIndexBuffer) {
             GLTFMTLBuffer *indexBuffer = (GLTFMTLBuffer *)indexAccessor.bufferView.buffer;
-            
+
             MTLIndexType indexType = (indexAccessor.componentType == GLTFDataTypeUShort) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
-            
+
             [renderEncoder drawIndexedPrimitives:primitiveType
                                       indexCount:indexAccessor.count
                                        indexType:indexType
@@ -399,7 +399,7 @@ void MetalRenderer::drawRenderList(NSArray<GLTFMTLRenderItem *> *renderList,
             GLTFAccessor *positionAccessor = accessorsForAttributes[GLTFAttributeSemanticPosition];
             [renderEncoder drawPrimitives:primitiveType vertexStart:0 vertexCount:positionAccessor.count];
         }
-        
+
         [renderEncoder popDebugGroup];
     }
 }
@@ -413,28 +413,28 @@ void MetalRenderer::bindTexturesForMaterial(GLTFMaterial *material,
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexBaseColor];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexBaseColor];
     }
-    
+
     if (material.normalTexture != nil) {
         id<MTLTexture> texture = textureForImage(material.normalTexture.texture.image, false);
         id<MTLSamplerState> sampler = samplerStateForSampler(material.normalTexture.texture.sampler);
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexNormal];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexNormal];
     }
-    
+
     if (material.metallicRoughnessTexture != nil) {
         id<MTLTexture> texture = textureForImage(material.metallicRoughnessTexture.texture.image, false);
         id<MTLSamplerState> sampler = samplerStateForSampler(material.metallicRoughnessTexture.texture.sampler);
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexMetallicRoughness];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexMetallicRoughness];
     }
-    
+
     if (material.emissiveTexture != nil) {
         id<MTLTexture> texture = textureForImage(material.emissiveTexture.texture.image, true);
         id<MTLSamplerState> sampler = samplerStateForSampler(material.emissiveTexture.texture.sampler);
         [renderEncoder setFragmentTexture:texture atIndex:GLTFTextureBindIndexEmissive];
         [renderEncoder setFragmentSamplerState:sampler atIndex:GLTFTextureBindIndexEmissive];
     }
-    
+
     if (material.occlusionTexture != nil) {
         id<MTLTexture> texture = textureForImage(material.occlusionTexture.texture.image, false);
         id<MTLSamplerState> sampler = samplerStateForSampler(material.occlusionTexture.texture.sampler);
@@ -450,7 +450,7 @@ id<MTLBuffer> MetalRenderer::dequeueReusableBufferOfLength(size_t length) {
             indexToReuse = i;
         }
     }
-    
+
     if (indexToReuse >= 0) {
         id <MTLBuffer> buffer = _bufferPool[indexToReuse];
         [_bufferPool removeObjectAtIndex:indexToReuse];
@@ -466,7 +466,7 @@ void MetalRenderer::computeJointsForSubmesh(GLTFSubmesh *submesh,
     GLTFAccessor *jointsAccessor = submesh.accessorsForAttributes[GLTFAttributeSemanticJoints0];
     GLTFSkin *skin = node.skin;
     GLTFAccessor *inverseBindingAccessor = node.skin.inverseBindMatricesAccessor;
-    
+
     if (jointsAccessor != nil && inverseBindingAccessor != nil) {
         NSInteger jointCount = skin.jointNodes.count;
         simd_float4x4 *jointMatrices = (simd_float4x4 *)jointBuffer.contents;
@@ -482,24 +482,24 @@ void MetalRenderer::computeJointsForSubmesh(GLTFSubmesh *submesh,
 id<MTLDepthStencilState> MetalRenderer::depthStencilStateForDepthWriteEnabled(bool depthWriteEnabled,
                                                                               bool depthTestEnabled,
                                                                               MTLCompareFunction compareFunction) {
-    
+
     NSInteger depthWriteBit = depthWriteEnabled ? 1 : 0;
     NSInteger depthTestBit = depthTestEnabled ? 1 : 0;
-    
+
     NSInteger hash = (compareFunction << 2) | (depthWriteBit << 1) | depthTestBit;
-    
+
     id <MTLDepthStencilState> depthStencilState = _depthStencilStateMap[@(hash)];
     if (depthStencilState) {
         return depthStencilState;
     }
-    
+
     MTLDepthStencilDescriptor *depthDescriptor = [MTLDepthStencilDescriptor new];
     depthDescriptor.depthCompareFunction = depthTestEnabled ? compareFunction : MTLCompareFunctionAlways;
     depthDescriptor.depthWriteEnabled = depthWriteEnabled;
     depthStencilState = [_metalDevice newDepthStencilStateWithDescriptor:depthDescriptor];
-    
+
     _depthStencilStateMap[@(hash)] = depthStencilState;
-    
+
     return depthStencilState;
 }
 
@@ -507,17 +507,17 @@ id<MTLDepthStencilState> MetalRenderer::depthStencilStateForDepthWriteEnabled(bo
 id<MTLTexture> MetalRenderer::textureForImage(GLTFImage *image,
                                               bool sRGB) {
 //    NSParameterAssert(image != nil);
-    
+
     id<MTLTexture> texture = _texturesForImageIdentifiers[image.identifier];
-    
+
     if (texture) {
         return texture;
     }
-    
+
     NSDictionary *options = @{ GLTFMTLTextureLoaderOptionGenerateMipmaps : @YES,
                                GLTFMTLTextureLoaderOptionSRGB : @(sRGB)
                              };
-    
+
     NSError *error = nil;
     if (image.imageData != nil) {
         texture = [_textureLoader newTextureWithData:image.imageData options:options error:&error];
@@ -531,19 +531,19 @@ id<MTLTexture> MetalRenderer::textureForImage(GLTFImage *image,
         texture = [_textureLoader newTextureWithData:data options:options error:&error];
         texture.label = image.name;
     }
-    
+
     if (!texture) {
         NSLog(@"Error occurred while loading texture: %@", error);
     } else {
         _texturesForImageIdentifiers[image.identifier] = texture;
     }
-    
+
     return texture;
 }
 
 id<MTLSamplerState> MetalRenderer::samplerStateForSampler(GLTFTextureSampler *sampler) {
 //    NSParameterAssert(sampler != nil);
-    
+
     id<MTLSamplerState> samplerState = _samplerStatesForSamplers[sampler];
     if (samplerState == nil) {
         MTLSamplerDescriptor *descriptor = [MTLSamplerDescriptor new];
@@ -558,4 +558,3 @@ id<MTLSamplerState> MetalRenderer::samplerStateForSampler(GLTFTextureSampler *sa
     }
     return samplerState;
 }
-

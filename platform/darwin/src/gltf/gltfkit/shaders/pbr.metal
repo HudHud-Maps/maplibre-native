@@ -127,13 +127,13 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
 )
 {
     VertexOut out = { 0 };
-    
+
     float4x4 normalMatrix = uniforms.normalMatrix;
-    
+
     #if USE_VERTEX_SKINNING
         ushort4 jointIndices = ushort4(in.joints0);
         float4 jointWeights = float4(in.weights0);
-        
+
         float4x4 skinMatrix = jointWeights[0] * jointMatrices[jointIndices[0]] +
                               jointWeights[1] * jointMatrices[jointIndices[1]] +
                               jointWeights[2] * jointMatrices[jointIndices[2]] +
@@ -148,7 +148,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
                           jointWeights[2] * jointMatrices[jointIndices[2]] +
                           jointWeights[3] * jointMatrices[jointIndices[3]];
         #endif
-        
+
         float4 skinnedPosition = skinMatrix * float4(in.position.xyz, 1);
         normalMatrix = normalMatrix * skinMatrix;
     #else
@@ -157,7 +157,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
 
     float4 position = uniforms.modelMatrix * skinnedPosition;
     out.worldPosition = position.xyz / position.w;
-    
+
     out.position = uniforms.modelViewProjectionMatrix * skinnedPosition;
 
     #if HAS_NORMALS
@@ -180,11 +180,11 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
             out.color = in.color;
         #endif
     #endif
-    
+
     #if HAS_VERTEX_ROUGHNESS
         out.roughness = in.roughness;
     #endif
-    
+
     #if HAS_VERTEX_METALLIC
         out.metalness = in.metalness;
     #endif
@@ -192,7 +192,7 @@ vertex VertexOut vertex_main(VertexIn in [[stage_in]],
     #if HAS_TEXCOORD_0
         out.texCoord0 = in.texCoord0;
     #endif
-    
+
     #if HAS_TEXCOORD_1
         out.texCoord1 = in.texCoord1;
     #endif
@@ -254,7 +254,7 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
                               constant FragmentUniforms &uniforms [[buffer(0)]],
                               bool frontFacing [[front_facing]])
 {
-    
+
     #if HAS_TEXTURE_TRANSFORM
         float2 baseColorTexCoord = (uniforms.textureMatrices[textureIndexBaseColor] * float3(in.BaseColorTexCoord, 1)).xy;
         float2 normalTexCoord = (uniforms.textureMatrices[textureIndexNormal] * float3(in.NormalTexCoord, 1)).xy;
@@ -268,7 +268,7 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
         float2 occlusionTexCoord = in.OcclusionTexCoord;
         float2 emissiveTexCoord = in.EmissiveTexCoord;
     #endif
-    
+
     float3x3 tbn;
     #if !HAS_TANGENTS
         float3 pos_dx = dfdx(in.worldPosition);
@@ -304,17 +304,17 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
 
     half perceptualRoughness = uniforms.metallicRoughnessValues.y;
     half metallic = uniforms.metallicRoughnessValues.x;
-    
+
     #if HAS_METALLIC_ROUGHNESS_MAP
         half4 mrSample = metallicRoughnessTexture.sample(metallicRoughnessSampler, metallicRoughnessTexCoord);
         perceptualRoughness = mrSample.g * perceptualRoughness;
         metallic = mrSample.b * metallic;
     #endif
-    
+
     #if HAS_VERTEX_ROUGHNESS
         perceptualRoughness = in.roughness;
     #endif
-        
+
     #if HAS_VERTEX_METALLIC
         metallic = in.metalness;
     #endif
@@ -336,7 +336,7 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
     #if HAS_VERTEX_COLOR
         baseColor *= half4(in.color);
     #endif
-    
+
     #if MATERIAL_IS_UNLIT
         #if USE_ALPHA_TEST
             if (baseColor.a < uniforms.alphaCutoff) {
@@ -345,7 +345,7 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
         #endif
         return baseColor;
     #endif
-    
+
     half3 f0(0.04);
     half3 diffuseColor = mix(baseColor.rgb * (1 - f0), half3(0), metallic);
     half3 specularColor = mix(f0, baseColor.rgb, metallic);
@@ -356,7 +356,7 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
 
     float3 V = normalize(uniforms.camera - in.worldPosition);
     float NdotV = saturate(dot(N, V));
-    
+
     float3 reflection = normalize(reflect(V, N)) * float3(-1, -1, 1);
 
     half3 color(0);
@@ -366,25 +366,25 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
 
         for (int i = 0; i < MAX_LIGHTS; ++i) {
             Light light = uniforms.lights[i];
-            
+
             float3 L = normalize((light.position.w == 0) ? -light.position.xyz : (light.position.xyz - in.worldPosition));
             float3 H = normalize(L + V);
 
             float NdotL = saturate(dot(N, L));
             float NdotH = saturate(dot(N, H));
             float VdotH = saturate(dot(V, H));
-            
+
             half3 F = SchlickFresnel(F0, VdotH);
             float G = SmithGeometric(NdotL, NdotV, alphaRoughness);
             float D = TrowbridgeReitzNDF(NdotH, alphaRoughness);
-            
+
             half3 diffuseContrib(0);
             half3 specContrib(0);
             if (NdotL > 0) {
                 diffuseContrib = NdotL * LambertDiffuse(diffuseColor);
                 specContrib = NdotL * D * F * G / (4.0 * NdotL * NdotV);
             }
-            
+
             half lightDist = length(light.position.xyz - in.worldPosition);
             half attenNum = (light.range > 0) ? saturate(1.0 - powr(lightDist / light.range, 4)) : 1;
             half atten = (light.position.w == 0) ? 1 : attenNum / powr(lightDist, 2);
@@ -397,9 +397,9 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
             color += half3(light.color.rgb * light.intensity) * atten * (diffuseContrib + specContrib);
         }
     #endif
-    
+
 //    baseColor = baseColorTexture.sample(baseColorSampler, baseColorTexCoord);
-    
+
     half3 diffuseLight1 = half3(0.5,0.5,0.5);
     diffuseLight1 *= uniforms.envIntensity;
     half3 specularLight1(0.5);
@@ -410,9 +410,9 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
     color += iblColor1;
     color = baseColor.rgb * NdotV;
 
-    
-    
-    
+
+
+
     return half4(color, baseColor.a);
 
 
@@ -423,7 +423,7 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
         half2 brdf = brdfLUT.sample(cubeSampler, float2(NdotV, perceptualRoughness)).xy;
         half3 diffuseLight = diffuseEnvTexture.sample(cubeSampler, N).rgb;
         diffuseLight *= uniforms.envIntensity;
-    
+
         half3 specularLight(0);
         if (mipCount > 1) {
             specularLight = specularEnvTexture.sample(cubeSampler, reflection, level(lod)).rgb;
@@ -431,33 +431,33 @@ fragment half4 fragment_main(VertexOut in [[stage_in]],
             specularLight = specularEnvTexture.sample(cubeSampler, reflection).rgb;
         }
         specularLight *= uniforms.envIntensity;
-    
+
         half3 iblDiffuse = diffuseLight * diffuseColor;
         half3 iblSpecular = specularLight * ((specularColor * brdf.x) + brdf.y);
-    
+
         half3 iblColor = iblDiffuse + iblSpecular;
 
         color += iblColor;
     #endif
-    
+
 
     #if HAS_OCCLUSION_MAP
         half ao = occlusionTexture.sample(occlusionSampler, occlusionTexCoord).r;
         color = mix(color, color * ao, half(uniforms.occlusionStrength));
     #endif
-    
+
     #if HAS_EMISSIVE_MAP
         half3 emissive = emissiveTexture.sample(emissiveSampler, emissiveTexCoord).rgb;
         color += emissive * half3(uniforms.emissiveFactor);
     #else
         color += half3(uniforms.emissiveFactor);
     #endif
-    
+
     #if USE_ALPHA_TEST
         if (baseColor.a < uniforms.alphaCutoff) {
             discard_fragment();
         }
     #endif
-    
+
     return half4(color, baseColor.a);
 }

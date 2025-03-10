@@ -95,7 +95,7 @@ public:
             } else {
                 userAgent = sessionConfig.HTTPAdditionalHeaders[@"User-Agent"];
             }
-            
+
         }
     }
 
@@ -225,7 +225,7 @@ BOOL isValidMapboxEndpoint(NSURL *url) {
 
 MLN_APPLE_EXPORT
 NSURL *resourceURL(const Resource& resource) {
-    
+
     NSURL *url = [NSURL URLWithString:@(resource.url.c_str())];
 
 #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
@@ -236,18 +236,18 @@ NSURL *resourceURL(const Resource& resource) {
         if (resource.usage == Resource::Usage::Offline) {
             [queryItems addObject:[NSURLQueryItem queryItemWithName:@"offline" value:@"true"]];
         }
-        
+
         if (components.queryItems) {
             [queryItems addObjectsFromArray:components.queryItems];
         }
-        
+
         components.queryItems = queryItems;
         url = components.URL;
     }
 #endif
     return url;
 }
-    
+
 std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, Callback callback) {
     auto request = std::make_unique<HTTPRequest>(callback);
     auto shared = request->shared; // Explicit copy so that it also gets copied into the completion handler block below.
@@ -292,7 +292,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
             dataTaskWithRequest:req
               completionHandler:^(NSData* data, NSURLResponse* res, NSError* error) {
                 session = nil;
-            
+
                 if (error && [error code] == NSURLErrorCancelled) {
                     [MLNNativeNetworkManager.sharedManager cancelDownloadEventForResponse:res];
                     return;
@@ -303,7 +303,7 @@ std::unique_ptr<AsyncRequest> HTTPFileSource::request(const Resource& resource, 
 
                 if (error) {
                     [MLNNativeNetworkManager.sharedManager errorLog:@"Requesting: %@ failed with error: %@", req.URL, error.debugDescription];
-                    
+
                     if (data) {
                         response.data =
                             std::make_shared<std::string>((const char*)[data bytes], [data length]);

@@ -34,12 +34,12 @@
     NSParameterAssert(submesh);
     NSParameterAssert(submesh.material);
     NSParameterAssert(submesh.vertexDescriptor);
-    
+
     NSError *error = nil;
     NSString *shaderSource = [self shaderSource];
-    
+
     shaderSource = [self rewriteSource:shaderSource forSubmesh:submesh];
-    
+
     id<MTLLibrary> library = [device newLibraryWithSource:shaderSource options:nil error:&error];
     if (!library) {
         NSLog(@"Error occurred while creating library for material : %@", error);
@@ -57,19 +57,19 @@
             fragmentFunction = function;
         }
     }
-    
+
     if (!vertexFunction || !fragmentFunction) {
         NSLog(@"Failed to find a vertex and fragment function in library source");
         return nil;
     }
-    
+
     MTLVertexDescriptor *vertexDescriptor = [self vertexDescriptorForSubmesh: submesh];
 
     MTLRenderPipelineDescriptor *pipelineDescriptor = [MTLRenderPipelineDescriptor new];
     pipelineDescriptor.vertexFunction = vertexFunction;
     pipelineDescriptor.fragmentFunction = fragmentFunction;
     pipelineDescriptor.vertexDescriptor = vertexDescriptor;
-    
+
     pipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat;
     pipelineDescriptor.sampleCount = sampleCount;
 
@@ -85,12 +85,12 @@
 
     pipelineDescriptor.depthAttachmentPixelFormat = depthStencilPixelFormat;
     pipelineDescriptor.stencilAttachmentPixelFormat = depthStencilPixelFormat;
-    
+
     id<MTLRenderPipelineState> pipeline = [device newRenderPipelineStateWithDescriptor:pipelineDescriptor error:&error];
     if (!pipeline) {
         NSLog(@"Error occurred when creating render pipeline state: %@", error);
     }
-    
+
     return pipeline;
 }
 
@@ -108,7 +108,7 @@
                  forSubmesh:(GLTFSubmesh *)submesh
 {
     GLTFMaterial *material = submesh.material;
-    
+
     BOOL usePBR = YES;
     BOOL useIBL = NO; // lightingEnvironment != nil;
     BOOL useDoubleSided = material.isDoubleSided;
@@ -169,7 +169,7 @@
 
     NSString *preamble = @"struct VertexIn {\n";
     NSString *epilogue = @"\n};";
-    
+
     NSMutableArray *attribs = [NSMutableArray array];
     int i = 0;
     for (GLTFVertexAttribute *attribute in submesh.vertexDescriptor.attributes) {
@@ -199,18 +199,18 @@
         } else if ([attribute.semantic isEqualToString:GLTFAttributeSemanticMetallic]) {
             [attribs addObject:[NSString stringWithFormat:@"    %@ metalness [[attribute(%d)]];", GLTFMTLTypeNameForType(attribute.componentType, attribute.dimension, false), i]];
         }
-        
+
         ++i;
     }
-    
+
     NSString *decls = [NSString stringWithFormat:@"%@%@%@%@",
                        shaderFeatures, preamble, [attribs componentsJoinedByString:@"\n"], epilogue];
-    
+
     NSRange startSigilRange = [source rangeOfString:@"/*%begin_replace_decls%*/"];
     NSRange endSigilRange = [source rangeOfString:@"/*%end_replace_decls%*/"];
-    
+
     NSRange declRange = NSUnionRange(startSigilRange, endSigilRange);
-    
+
     source = [source stringByReplacingCharactersInRange:declRange withString:decls];
 
     return source;
@@ -218,23 +218,23 @@
 
 - (MTLVertexDescriptor *)vertexDescriptorForSubmesh:(GLTFSubmesh *)submesh {
     MTLVertexDescriptor *vertexDescriptor = [MTLVertexDescriptor new];
-    
+
     GLTFVertexDescriptor *descriptor = submesh.vertexDescriptor;
-    
+
     for (NSInteger attributeIndex = 0; attributeIndex < GLTFVertexDescriptorMaxAttributeCount; ++attributeIndex) {
         GLTFVertexAttribute *attribute = descriptor.attributes[attributeIndex];
         GLTFBufferLayout *layout = descriptor.bufferLayouts[attributeIndex];
-        
+
         if (attribute.componentType == 0) {
             continue;
         }
-        
+
         MTLVertexFormat vertexFormat = GLTFMTLVertexFormatForComponentTypeAndDimension(attribute.componentType, attribute.dimension);
-        
+
         vertexDescriptor.attributes[attributeIndex].offset = 0;
         vertexDescriptor.attributes[attributeIndex].format = vertexFormat;
         vertexDescriptor.attributes[attributeIndex].bufferIndex = attributeIndex;
-        
+
         vertexDescriptor.layouts[attributeIndex].stride = layout.stride;
         vertexDescriptor.layouts[attributeIndex].stepRate = 1;
         vertexDescriptor.layouts[attributeIndex].stepFunction = MTLVertexStepFunctionPerVertex; // MTLStepFunctionPerVertex;
