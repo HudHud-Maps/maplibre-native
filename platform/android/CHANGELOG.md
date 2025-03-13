@@ -6,6 +6,15 @@
 
 ### 🐞 Bug fixes
 
+## 11.6.3
+
+## Features and improvements
+
+### Bug fixes
+
+- LoD Clamping fixed to be based on view range and not source range to support over/under zooming
+- Disable depth writing for the location indicator layer
+
 ## 11.6.2
 
 ### Features and Improvements
