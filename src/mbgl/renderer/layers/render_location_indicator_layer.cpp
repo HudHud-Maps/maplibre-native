@@ -1125,7 +1125,9 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
 
             drawable->setName(name);
             drawable->setRenderPass(drawPasses);
-            drawable->setDepthType(gfx::DepthMaskType::ReadWrite);
+            drawable->setDepthType(gfx::DepthMaskType::ReadOnly);
+            drawable->setEnableDepth(false);
+            drawable->setEnableStencil(false);
             drawable->setColorMode(drawPasses == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
                                                                          : gfx::ColorMode::unblended());
 
