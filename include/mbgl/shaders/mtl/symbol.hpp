@@ -214,8 +214,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 };
 
 template <>
-struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "SymbolSDFIconShader";
+struct ShaderSource<BuiltIn::SymbolSDFShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "SymbolSDFShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
