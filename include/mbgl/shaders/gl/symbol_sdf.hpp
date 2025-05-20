@@ -47,6 +47,7 @@ layout (std140) uniform SymbolDrawableUBO {
     bool u_pitch_with_map;
     bool u_is_size_zoom_constant;
     bool u_is_size_feature_constant;
+    bool u_is_offset;
 
     highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
     highp float u_size; // used when size is both zoom and feature constant
@@ -57,7 +58,6 @@ layout (std140) uniform SymbolDrawableUBO {
     highp float u_opacity_t;
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
-    bool u_is_offset;
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {

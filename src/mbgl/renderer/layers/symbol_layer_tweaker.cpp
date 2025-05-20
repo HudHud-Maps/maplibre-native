@@ -168,6 +168,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .pitch_with_map = (symbolData.pitchAlignment == style::AlignmentType::Map),
             .is_size_zoom_constant = size.isZoomConstant,
             .is_size_feature_constant = size.isFeatureConstant,
+            .is_offset = symbolData.isOffset,
 
             .size_t = size.sizeT,
             .size = size.size,
@@ -177,7 +178,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             .opacity_t = getInterpFactor<TextOpacity, IconOpacity, 0>(paintProperties, isText, zoom),
             .halo_width_t = getInterpFactor<TextHaloWidth, IconHaloWidth, 0>(paintProperties, isText, zoom),
             .halo_blur_t = getInterpFactor<TextHaloBlur, IconHaloBlur, 0>(paintProperties, isText, zoom),
-            .is_offset = symbolData.isOffset,
         };
 
 #if MLN_UBO_CONSOLIDATION
