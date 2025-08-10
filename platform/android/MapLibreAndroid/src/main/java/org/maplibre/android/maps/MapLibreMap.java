@@ -118,6 +118,14 @@ public final class MapLibreMap {
     nativeMapView.enableRenderingStatsView(value);
   }
 
+  public void toggleTransform() {
+    nativeMapView.toggleTransform();
+  }
+
+  public void setFrustumOffset(@NonNull RectF offset) {
+    nativeMapView.setFrustumOffset(offset);
+  }
+
   public void setSwapBehaviorFlush(boolean flush) {
     nativeMapView.setSwapBehaviorFlush(flush);
   }
@@ -634,7 +642,7 @@ public final class MapLibreMap {
    * @param cameraPosition the camera position to set
    */
   public void setCameraPosition(@NonNull CameraPosition cameraPosition) {
-    moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), null);
+    moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), true, null);
   }
 
   /**
@@ -645,7 +653,12 @@ public final class MapLibreMap {
    * @param update The change that should be applied to the camera.
    */
   public final void moveCamera(@NonNull CameraUpdate update) {
-    moveCamera(update, null);
+    moveCamera(update, true, null);
+  }
+
+  public final void moveCamera(@NonNull final CameraUpdate update,
+                               @Nullable final MapLibreMap.CancelableCallback callback) {
+    moveCamera(update, true, callback);
   }
 
   /**
@@ -657,9 +670,10 @@ public final class MapLibreMap {
    * @param callback the callback to be invoked when an animation finishes or is canceled
    */
   public final void moveCamera(@NonNull final CameraUpdate update,
+                               @NonNull final boolean shouldCancelTransitions,
                                @Nullable final MapLibreMap.CancelableCallback callback) {
     notifyDeveloperAnimationListeners();
-    transform.moveCamera(MapLibreMap.this, update, callback);
+    transform.moveCamera(MapLibreMap.this, update, shouldCancelTransitions, callback);
   }
 
   /**
@@ -744,7 +758,12 @@ public final class MapLibreMap {
    * @param easingInterpolator True for easing interpolator, false for linear.
    */
   public final void easeCamera(@NonNull CameraUpdate update, int durationMs, boolean easingInterpolator) {
-    easeCamera(update, durationMs, easingInterpolator, null);
+    easeCamera(update, durationMs, easingInterpolator, true, null);
+  }
+
+  public final void easeCamera(@NonNull CameraUpdate update, int durationMs, boolean easingInterpolator,
+                               @Nullable final MapLibreMap.CancelableCallback callback) {
+    easeCamera(update, durationMs, easingInterpolator, true, callback);
   }
 
   /**
@@ -766,12 +785,14 @@ public final class MapLibreMap {
   public final void easeCamera(@NonNull final CameraUpdate update,
                                final int durationMs,
                                final boolean easingInterpolator,
+                               final boolean shouldCancelTransitions,
                                @Nullable final MapLibreMap.CancelableCallback callback) {
     if (durationMs <= 0) {
       throw new IllegalArgumentException("Null duration passed into easeCamera");
     }
     notifyDeveloperAnimationListeners();
-    transform.easeCamera(MapLibreMap.this, update, durationMs, easingInterpolator, callback);
+
+    transform.easeCamera(MapLibreMap.this, update, durationMs, easingInterpolator, shouldCancelTransitions, callback);
   }
 
   /**
@@ -784,7 +805,7 @@ public final class MapLibreMap {
    * @see CameraUpdateFactory for a set of updates.
    */
   public final void animateCamera(@NonNull CameraUpdate update) {
-    animateCamera(update, MapLibreConstants.ANIMATION_DURATION, null);
+    animateCamera(update, MapLibreConstants.ANIMATION_DURATION, true, null);
   }
 
   /**
@@ -800,7 +821,7 @@ public final class MapLibreMap {
    * @see CameraUpdateFactory for a set of updates.
    */
   public final void animateCamera(@NonNull CameraUpdate update, @Nullable MapLibreMap.CancelableCallback callback) {
-    animateCamera(update, MapLibreConstants.ANIMATION_DURATION, callback);
+    animateCamera(update, MapLibreConstants.ANIMATION_DURATION, true, callback);
   }
 
   /**
@@ -815,7 +836,12 @@ public final class MapLibreMap {
    * @see CameraUpdateFactory for a set of updates.
    */
   public final void animateCamera(@NonNull CameraUpdate update, int durationMs) {
-    animateCamera(update, durationMs, null);
+    animateCamera(update, durationMs, true, null);
+  }
+
+  public final void animateCamera(@NonNull CameraUpdate update, int durationMs,
+                                  @Nullable MapLibreMap.CancelableCallback callback) {
+    animateCamera(update, durationMs, true, callback);
   }
 
   /**
@@ -837,12 +863,13 @@ public final class MapLibreMap {
    * @see CameraUpdateFactory for a set of updates.
    */
   public final void animateCamera(@NonNull final CameraUpdate update, final int durationMs,
+                                  final boolean shouldCancelTransitions,
                                   @Nullable final MapLibreMap.CancelableCallback callback) {
     if (durationMs <= 0) {
       throw new IllegalArgumentException("Null duration passed into animateCamera");
     }
     notifyDeveloperAnimationListeners();
-    transform.animateCamera(MapLibreMap.this, update, durationMs, callback);
+    transform.animateCamera(MapLibreMap.this, update, durationMs, shouldCancelTransitions, callback);
   }
 
   /**

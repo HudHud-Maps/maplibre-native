@@ -1154,6 +1154,15 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void toggleTransform() {
+    nativeToggleTransform();
+  }
+
+  @Override
+  public void setFrustumOffset(RectF offset) {
+    nativeSetFrustumOffset(offset);
+  }
+
   public void addPluginProtocolHandler(PluginProtocolHandler protocolHandler) {
     PluginFileSource pluginFileSource = new PluginFileSource();
     pluginFileSource.protocolHandler = protocolHandler;
@@ -1758,8 +1767,13 @@ final class NativeMapView implements NativeMap {
   private native void nativeEnableRenderingStatsView(boolean enabled);
 
   @Keep
-  private native void nativeAddPluginFileSource(PluginFileSource fileSource);
+  private native void nativeToggleTransform();
 
+  @Keep
+  private native void nativeSetFrustumOffset(RectF offsset);
+
+  @Keep
+  private native void nativeAddPluginFileSource(PluginFileSource fileSource);
 
 
   //

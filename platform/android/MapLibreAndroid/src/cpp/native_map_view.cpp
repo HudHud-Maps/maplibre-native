@@ -931,6 +931,7 @@ void NativeMapView::setTransitionOptions(JNIEnv& env, const jni::Object<Transiti
     const mbgl::style::TransitionOptions transitionOptions(
         Duration(mbgl::Milliseconds(TransitionOptions::getDuration(env, options))),
         Duration(mbgl::Milliseconds(TransitionOptions::getDelay(env, options))),
+        util::DEFAULT_TRANSITION_EASE,
         TransitionOptions::isEnablePlacementTransitions(env, options));
     map->getStyle().setTransitionOptions(transitionOptions);
 }
@@ -1322,6 +1323,19 @@ void NativeMapView::enableRenderingStatsView(JNIEnv&, jni::jboolean value) {
     map->enableRenderingStatsView(value);
 }
 
+void NativeMapView::toggleTransform(JNIEnv&) {
+    assert(map);
+    map->toggleTransform();
+}
+
+void NativeMapView::setFrustumOffset(JNIEnv& env, const jni::Object<RectF>& padding) {
+    mbgl::EdgeInsets offset = {RectF::getTop(env, padding),
+                               RectF::getLeft(env, padding),
+                               RectF::getBottom(env, padding),
+                               RectF::getRight(env, padding)};
+    map->setFrustumOffset(offset);
+}
+
 // Plugins
 void NativeMapView::addPluginFileSource(JNIEnv& jniEnv, const jni::Object<PluginFileSource>& pluginFileSource) {
     // TODO: Unclear if any of these options are needed for plugins
@@ -1521,6 +1535,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
         METHOD(&NativeMapView::setTileCacheEnabled, "nativeSetTileCacheEnabled"),
         METHOD(&NativeMapView::getTileCacheEnabled, "nativeGetTileCacheEnabled"),
+        METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
+        METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"),
         METHOD(&NativeMapView::setTileLodMinRadius, "nativeSetTileLodMinRadius"),
         METHOD(&NativeMapView::getTileLodMinRadius, "nativeGetTileLodMinRadius"),
         METHOD(&NativeMapView::setTileLodScale, "nativeSetTileLodScale"),
@@ -1530,6 +1546,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setTileLodZoomShift, "nativeSetTileLodZoomShift"),
         METHOD(&NativeMapView::getTileLodZoomShift, "nativeGetTileLodZoomShift"),
         METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"),
+        METHOD(&NativeMapView::toggleTransform, "nativeToggleTransform"),
+        METHOD(&NativeMapView::setFrustumOffset, "nativeSetFrustumOffset"));
         METHOD(&NativeMapView::isRenderingStatsViewEnabled, "nativeIsRenderingStatsViewEnabled"),
         METHOD(&NativeMapView::enableRenderingStatsView, "nativeEnableRenderingStatsView"),
         METHOD(&NativeMapView::addPluginFileSource, "nativeAddPluginFileSource"));
