@@ -264,7 +264,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -291,7 +290,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -318,7 +316,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -345,7 +342,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -373,7 +369,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -422,7 +417,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
         val uiSettings = Mockito.mock(UiSettings::class.java)
@@ -453,7 +447,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -480,7 +473,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -510,7 +502,6 @@ class LocationCameraControllerTest {
             ArgumentMatchers.any(
                 CameraUpdate::class.java
             ),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -540,7 +531,6 @@ class LocationCameraControllerTest {
             ArgumentMatchers.any(
                 CameraUpdate::class.java
             ),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -568,7 +558,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -596,7 +585,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -624,7 +612,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -652,7 +639,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -679,7 +665,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -706,7 +691,6 @@ class LocationCameraControllerTest {
                 MapLibreMap::class.java
             ),
             ArgumentMatchers.any(CameraUpdate::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -1094,7 +1078,6 @@ class LocationCameraControllerTest {
                     CameraUpdate::class.java
                 ),
                 ArgumentMatchers.any(Int::class.java),
-                ArgumentMatchers.any(Boolean::class.java),
                 ArgumentMatchers.any(CancelableCallback::class.java)
             )
     }
@@ -1135,7 +1118,6 @@ class LocationCameraControllerTest {
                     CameraUpdate::class.java
                 ),
                 ArgumentMatchers.any(Int::class.java),
-                ArgumentMatchers.any(Boolean::class.java),
                 ArgumentMatchers.any(CancelableCallback::class.java)
             )
     }
@@ -1179,7 +1161,6 @@ class LocationCameraControllerTest {
                 CameraUpdate::class.java
             ),
             ArgumentMatchers.any(Int::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.any(CancelableCallback::class.java)
         )
         camera.setCameraMode(
@@ -1199,7 +1180,6 @@ class LocationCameraControllerTest {
                     CameraUpdate::class.java
                 ),
                 ArgumentMatchers.any(Int::class.java),
-                ArgumentMatchers.any(Boolean::class.java),
                 ArgumentMatchers.any(CancelableCallback::class.java)
             )
     }
@@ -1272,7 +1252,6 @@ class LocationCameraControllerTest {
                     CameraUpdate::class.java
                 ),
                 ArgumentMatchers.any(Int::class.java),
-                ArgumentMatchers.any(Boolean::class.java),
                 ArgumentMatchers.any(CancelableCallback::class.java)
             )
     }
@@ -1325,7 +1304,6 @@ class LocationCameraControllerTest {
                 CameraUpdate::class.java
             ),
             ArgumentMatchers.any(Int::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.any(CancelableCallback::class.java)
         )
         camera.setCameraMode(
@@ -1346,7 +1324,6 @@ class LocationCameraControllerTest {
                     CameraUpdate::class.java
                 ),
                 ArgumentMatchers.any(Int::class.java),
-                ArgumentMatchers.any(Boolean::class.java),
                 ArgumentMatchers.any(CancelableCallback::class.java)
             )
     }
@@ -1390,7 +1367,6 @@ class LocationCameraControllerTest {
                 CameraUpdate::class.java
             ),
             ArgumentMatchers.any(Int::class.java),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.any(CancelableCallback::class.java)
         )
         camera.setCameraMode(
@@ -1410,7 +1386,6 @@ class LocationCameraControllerTest {
                     CameraUpdate::class.java
                 ),
                 ArgumentMatchers.any(Int::class.java),
-                ArgumentMatchers.any(Boolean::class.java),
                 ArgumentMatchers.any(CancelableCallback::class.java)
             )
     }
@@ -1466,7 +1441,6 @@ class LocationCameraControllerTest {
             ArgumentMatchers.eq(maplibreMap),
             ArgumentMatchers.eq(newCameraPosition(builder.build())),
             ArgumentMatchers.eq(LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS.toInt()),
-            ArgumentMatchers.any(Boolean::class.java),
             callbackCaptor.capture()
         )
         Assert.assertTrue(camera.isTransitioning)
@@ -1525,7 +1499,6 @@ class LocationCameraControllerTest {
         Mockito.verify(transform).moveCamera(
             ArgumentMatchers.eq(maplibreMap),
             ArgumentMatchers.eq(newCameraPosition(builder.build())),
-            ArgumentMatchers.any(Boolean::class.java),
             callbackCaptor.capture()
         )
         Assert.assertTrue(camera.isTransitioning)
@@ -1585,7 +1558,6 @@ class LocationCameraControllerTest {
             ArgumentMatchers.eq(maplibreMap),
             ArgumentMatchers.eq(newCameraPosition(builder.build())),
             ArgumentMatchers.eq(LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS.toInt()),
-            ArgumentMatchers.any(Boolean::class.java),
             callbackCaptor.capture()
         )
         Assert.assertTrue(camera.isTransitioning)
@@ -1642,7 +1614,6 @@ class LocationCameraControllerTest {
             ArgumentMatchers.eq(maplibreMap),
             ArgumentMatchers.eq(newCameraPosition(builder.build())),
             ArgumentMatchers.eq(LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS.toInt()),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.any(CancelableCallback::class.java)
         )
     }
@@ -1695,7 +1666,6 @@ class LocationCameraControllerTest {
             ArgumentMatchers.eq(maplibreMap),
             ArgumentMatchers.eq(newCameraPosition(builder.build())),
             ArgumentMatchers.eq(LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS.toInt()),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.any(CancelableCallback::class.java)
         )
     }
@@ -1746,7 +1716,6 @@ class LocationCameraControllerTest {
             ArgumentMatchers.eq(maplibreMap),
             ArgumentMatchers.any(CameraUpdate::class.java),
             ArgumentMatchers.eq(LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS.toInt()),
-            ArgumentMatchers.any(Boolean::class.java),
             callbackCaptor.capture()
         )
         val latLng = LatLng(10.0, 10.0)
@@ -1771,7 +1740,6 @@ class LocationCameraControllerTest {
             ArgumentMatchers.any(
                 CameraUpdate::class.java
             ),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
         callbackCaptor.value.onFinish()
@@ -1796,7 +1764,6 @@ class LocationCameraControllerTest {
             ArgumentMatchers.any(
                 CameraUpdate::class.java
             ),
-            ArgumentMatchers.any(Boolean::class.java),
             ArgumentMatchers.nullable(CancelableCallback::class.java)
         )
     }
@@ -1842,7 +1809,6 @@ class LocationCameraControllerTest {
                 ArgumentMatchers.eq(maplibreMap),
                 ArgumentMatchers.eq(cameraUpdate),
                 ArgumentMatchers.eq(1200),
-                ArgumentMatchers.any(Boolean::class.java),
                 ArgumentMatchers.any(
                     CancelableCallback::class.java
                 )
@@ -1891,7 +1857,6 @@ class LocationCameraControllerTest {
                 ArgumentMatchers.eq(maplibreMap),
                 ArgumentMatchers.eq(cameraUpdate),
                 ArgumentMatchers.eq(1200),
-                ArgumentMatchers.any(Boolean::class.java),
                 ArgumentMatchers.any(
                     CancelableCallback::class.java
                 )

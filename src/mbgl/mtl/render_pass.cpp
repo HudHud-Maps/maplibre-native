@@ -78,7 +78,6 @@ void RenderPass::resetState() {
 
     currentCullMode = MTL::CullModeNone;
     currentWinding = MTL::WindingClockwise;
-    currentRect = {0, 0, 0, 0};
 }
 
 namespace {
@@ -195,6 +194,7 @@ void RenderPass::setFragmentSamplerState(const MTLSamplerStatePtr& state, int32_
     }
 }
 
+/// Set the render pipeline state
 void RenderPass::setRenderPipelineState(const MTLRenderPipelineStatePtr& pipelineState) {
     if (pipelineState != currentPipelineState) {
         currentPipelineState = pipelineState;
@@ -213,14 +213,6 @@ void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
     if (winding != currentWinding) {
         encoder->setFrontFacingWinding(winding);
         currentWinding = winding;
-    }
-}
-
-void RenderPass::setScissorRect(const MTL::ScissorRect rect) {
-    if (rect.x != currentRect.x || rect.y != currentRect.y || rect.width != currentRect.width ||
-        rect.height != currentRect.height) {
-        encoder->setScissorRect(rect);
-        currentRect = rect;
     }
 }
 

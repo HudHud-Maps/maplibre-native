@@ -1,7 +1,6 @@
 #include <mbgl/map/camera.hpp>
 #include <mbgl/map/transform.hpp>
 #include <mbgl/util/constants.hpp>
-#include <mbgl/util/geo.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/unitbezier.hpp>
@@ -23,7 +22,7 @@ namespace mbgl {
 
 /** Converts the given angle (in radians) to be numerically close to the anchor
  * angle, allowing it to be interpolated properly without sudden jumps. */
-double normalizeAngle(double angle, double anchorAngle) {
+static double _normalizeAngle(double angle, double anchorAngle) {
     if (std::isnan(angle) || std::isnan(anchorAngle)) {
         return 0;
     }
@@ -153,8 +152,8 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
 
     // Minimize rotation by taking the shorter path around the circle.
-    bearing = normalizeAngle(bearing, state.getBearing());
-    state.setBearing(normalizeAngle(state.getBearing(), bearing));
+    bearing = _normalizeAngle(bearing, state.getBearing());
+    state.setBearing(_normalizeAngle(state.getBearing(), bearing));
 
     const double startZoom = state.getZoom();
     const double startBearing = state.getBearing();
@@ -233,8 +232,8 @@ void Transform::flyTo(const CameraOptions& inputCamera,
     pitch = util::clamp(pitch, state.getMinPitch(), state.getMaxPitch());
 
     // Minimize rotation by taking the shorter path around the circle.
-    bearing = normalizeAngle(bearing, state.getBearing());
-    state.setBearing(normalizeAngle(state.getBearing(), bearing));
+    bearing = _normalizeAngle(bearing, state.getBearing());
+    state.setBearing(_normalizeAngle(state.getBearing(), bearing));
     const double startZoom = state.scaleZoom(state.getScale());
     const double startBearing = state.getBearing();
     const double startPitch = state.getPitch();
@@ -428,14 +427,6 @@ void Transform::setMaxPitch(const double maxPitch) {
                          " degrees), the value will be clamped.");
     }
     state.setMaxPitch(util::deg2rad(maxPitch));
-}
-
-void Transform::setFrustumOffset(const EdgeInsets& frustumOffset) {
-    state.setFrustumOffset(frustumOffset);
-}
-
-EdgeInsets Transform::getFrustumOffset() {
-    return state.getFrustumOffset();
 }
 
 // MARK: - Bearing

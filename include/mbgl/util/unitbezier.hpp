@@ -106,13 +106,13 @@ struct UnitBezier {
     }
 
 private:
-    double cx;
-    double bx;
-    double ax;
+    const double cx;
+    const double bx;
+    const double ax;
 
-    double cy;
-    double by;
-    double ay;
+    const double cy;
+    const double by;
+    const double ay;
 };
 
 } // namespace util

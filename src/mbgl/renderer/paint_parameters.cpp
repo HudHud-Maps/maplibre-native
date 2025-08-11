@@ -58,8 +58,7 @@ PaintParameters::PaintParameters(gfx::Context& context_,
                                  uint64_t frameCount_,
                                  double tileLodMinRadius_,
                                  double tileLodScale_,
-                                 double tileLodPitchThreshold_,
-                                 const gfx::ScissorRect& scissorRect_)
+                                 double tileLodPitchThreshold_)
     : context(context_),
       backend(backend_),
       encoder(context.createCommandEncoder()),
@@ -77,8 +76,7 @@ PaintParameters::PaintParameters(gfx::Context& context_,
       frameCount(frameCount_),
       tileLodMinRadius(tileLodMinRadius_),
       tileLodScale(tileLodScale_),
-      tileLodPitchThreshold(tileLodPitchThreshold_),
-      scissorRect(scissorRect_) {
+      tileLodPitchThreshold(tileLodPitchThreshold_) {
     pixelsToGLUnits = {{2.0f / state.getSize().width, -2.0f / state.getSize().height}};
 
     if (state.getViewportMode() == ViewportMode::FlippedY) {

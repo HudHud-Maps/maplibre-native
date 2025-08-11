@@ -24,7 +24,8 @@ TEST(OffscreenTexture, EmptyRed) {
     gfx::BackendScope scope{backend};
 
     // Scissor test shouldn't leak after gl::HeadlessBackend::bind().
-    static_cast<gl::Context&>(backend.getContext()).scissorTest.setCurrentValue({64, 64, 128, 128});
+    MBGL_CHECK_ERROR(glScissor(64, 64, 128, 128));
+    static_cast<gl::Context&>(backend.getContext()).scissorTest.setCurrentValue(true);
 
     backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
 
@@ -145,7 +146,8 @@ void main() {
     gl::OffscreenTexture offscreenTexture(context, {128, 128});
 
     // Scissor test shouldn't leak after OffscreenTexture::bind().
-    context.scissorTest.setCurrentValue({32, 32, 64, 64});
+    MBGL_CHECK_ERROR(glScissor(32, 32, 64, 64));
+    context.scissorTest.setCurrentValue(true);
 
     offscreenTexture.getResource<gl::RenderableResource>().bind();
 

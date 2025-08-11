@@ -2,7 +2,3 @@
 .gradle
 app/build
 app/src/main/assets/data.zip
-.project
-.settings
-.classpath
-build/

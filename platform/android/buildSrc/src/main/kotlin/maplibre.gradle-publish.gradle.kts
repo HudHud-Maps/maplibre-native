@@ -44,67 +44,71 @@ project.logger.lifecycle(project.extra["versionName"].toString())
 version = project.extra["versionName"] as String
 group = project.extra["mapLibreArtifactGroupId"] as String
 
-fun PublishingExtension.configureMavenPublication(
+fun configureMavenPublication(
     renderer: String,
     publicationName: String,
     artifactIdPostfix: String,
     descriptionPostfix: String,
     buildType: String = "Release"
 ) {
-    publications {
-        create<MavenPublication>(publicationName) {
-            groupId = project.group.toString().replace("org.maplibre.gl", "org.hudhud.maplibre.gl")
-            artifactId = "${project.extra["mapLibreArtifactId"]}$artifactIdPostfix"
-            version = project.version.toString()
+    publishing {
+        publications {
+            create<MavenPublication>(publicationName) {
+                groupId = project.group.toString()
+                artifactId = "${project.extra["mapLibreArtifactId"]}$artifactIdPostfix"
+                version = project.version.toString()
 
-            from(components["${renderer}${buildType}"])
+                from(components["${renderer}${buildType}"])
 
-            pom {
-                name.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")
-                description.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")
-                url.set(project.extra["mapLibreArtifactUrl"].toString())
-                licenses {
-                    license {
-                        name.set(project.extra["mapLibreArtifactLicenseName"].toString())
-                        url.set(project.extra["mapLibreArtifactLicenseUrl"].toString())
-                    }
-                }
-                developers {
-                    developer {
-                        id.set(project.extra["mapLibreDeveloperId"].toString())
-                        name.set(project.extra["mapLibreDeveloperName"].toString())
-                        email.set("team@maplibre.org")
-                    }
-                }
-                scm {
-                    connection.set(project.extra["mapLibreArtifactScmUrl"].toString())
-                    developerConnection.set(project.extra["mapLibreArtifactScmUrl"].toString())
+                pom {
+                    name.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")
+                    description.set("${project.extra["mapLibreArtifactTitle"]}$descriptionPostfix")
                     url.set(project.extra["mapLibreArtifactUrl"].toString())
+                    licenses {
+                        license {
+                            name.set(project.extra["mapLibreArtifactLicenseName"].toString())
+                            url.set(project.extra["mapLibreArtifactLicenseUrl"].toString())
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set(project.extra["mapLibreDeveloperId"].toString())
+                            name.set(project.extra["mapLibreDeveloperName"].toString())
+                            email.set("team@maplibre.org")
+                        }
+                    }
+                    scm {
+                        connection.set(project.extra["mapLibreArtifactScmUrl"].toString())
+                        developerConnection.set(project.extra["mapLibreArtifactScmUrl"].toString())
+                        url.set(project.extra["mapLibreArtifactUrl"].toString())
+                    }
                 }
             }
         }
+    }
+}
+
+
+// workaround for https://github.com/gradle/gradle/issues/26091#issuecomment-1836156762
+// https://github.com/gradle-nexus/publish-plugin/issues/208
+tasks {
+    withType<PublishToMavenRepository> {
+        dependsOn(withType<Sign>())
     }
 }
 
 afterEvaluate {
-    publishing {
-        configureMavenPublication("opengl", "defaultrelease", "", "")
-        configureMavenPublication("opengl", "defaultdebug", "-debug", " (Debug)", "Debug")
-        configureMavenPublication("vulkan", "vulkanrelease", "-vulkan", "(Vulkan)")
-        configureMavenPublication("vulkan", "vulkandebug", "-vulkan-debug", "(Vulkan, Debug)", "Debug")
-
-        repositories {
-            maven {
-                name = "GithubPackages"
-                url = uri("https://maven.pkg.github.com/HudHud-Maps/maplibre-native")
-                credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
-                }
-            }
-        }
-    }
+    configureMavenPublication("opengl", "defaultrelease", "", "")
+    configureMavenPublication("opengl", "defaultdebug", "-debug", " (Debug)", "Debug")
+    configureMavenPublication("vulkan", "vulkanrelease", "-vulkan", "(Vulkan)")
+    configureMavenPublication("vulkan", "vulkandebug", "-vulkan-debug", "(Vulkan, Debug)", "Debug")
+    // Right now this is the same as the first, but in the future we might release a major version
+    // which defaults to Vulkan (or has support for multiple backends). We will keep using only
+    // OpenGL ES with this artifact ID if that happens.
+    configureMavenPublication("opengl", "openglrelease", "-opengl", " (OpenGL ES)")
+    configureMavenPublication("opengl", "opengldebug", "-opengl-debug", " (OpenGL ES, Debug)", "Debug")
 }
+
 
 afterEvaluate {
     android.libraryVariants.forEach { variant ->
@@ -116,6 +120,6 @@ afterEvaluate {
     }
 }
 
-// signing {
-//     sign(publishing.publications)
-// }
+signing {
+    sign(publishing.publications)
+}

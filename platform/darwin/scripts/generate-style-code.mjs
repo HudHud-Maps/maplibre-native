@@ -8,6 +8,9 @@ import { readAndCompile, writeIfModified, camelize, unhyphenate } from "../../..
 
 import styleSpec from "../../../scripts/style-spec.mjs";
 
+delete styleSpec.layer.type.values["location-indicator"];
+delete styleSpec["layout_location-indicator"]
+delete styleSpec["paint_location-indicator"];
 
 import cocoaConventions from './style-spec-cocoa-conventions-v8.json' with { type: "json" };
 import styleSpecOverrides from './style-spec-overrides-v8.json' with { type: "json" };
@@ -229,8 +232,6 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
                     return `@"{'top','bottom'}"`;
                 case 'mode':
                     return `@"{'horizontal','vertical'}"`;
-                case 'location':
-                    return '@"{1, 2, 3}"';
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }
@@ -287,8 +288,6 @@ global.mbglTestValue = function (property, layerType) {
                     return '{ mbgl::style::SymbolAnchorType::Top, mbgl::style::SymbolAnchorType::Bottom }';
                 case 'mode':
                     return '{ mbgl::style::TextWritingModeType::Horizontal, mbgl::style::TextWritingModeType::Vertical }';
-                case 'location':
-                    return '{1, 2, 3}';
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }
@@ -703,7 +702,6 @@ global.propertyType = function (property) {
                 case 'position':
                 case 'offset':
                 case 'translate':
-                case 'location':
                     return 'NSValue *';
                 case 'anchor':
                 case 'mode':
@@ -733,11 +731,6 @@ global.valueTransformerArguments = function (property) {
         case 'boolean':
             return ['bool', objCType];
         case 'number':
-            if (/bearing$/.test(property.name) &&
-                property.period == 360 &&
-                property.units =='degrees') {
-                    return ['mbgl::style::Rotation', objCType];
-            }
             return ['float', objCType];
         case 'formatted':
             return ['mbgl::style::expression::Formatted', objCType];
@@ -770,8 +763,6 @@ global.valueTransformerArguments = function (property) {
                     return ['std::vector<mbgl::style::SymbolAnchorType>', objCType, 'mbgl::style::SymbolAnchorType', 'MLNTextAnchor'];
                 case 'mode':
                     return ['std::vector<mbgl::style::TextWritingModeType>', objCType, 'mbgl::style::TextWritingModeType', 'MLNTextWritingMode'];
-                case 'location':
-                    return ['std::array<double, 3>', objCType];
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }
@@ -831,8 +822,6 @@ global.mbglType = function(property) {
                     return 'std::vector<mbgl::style::SymbolAnchorType>';
                 case 'mode':
                     return 'std::vector<mbgl::style::TextWritingModeType>';
-                case 'location':
-                    return 'std::array<double, 3>';
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }

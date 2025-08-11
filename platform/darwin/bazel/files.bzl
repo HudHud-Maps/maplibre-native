@@ -9,7 +9,6 @@ MLN_GENERATED_DARWIN_STYLE_SOURCE = [
     "src/MLNLineStyleLayer.mm",
     "src/MLNRasterStyleLayer.mm",
     "src/MLNSymbolStyleLayer.mm",
-    "src/MLNLocationIndicatorStyleLayer.mm",
 ]
 
 MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS = [
@@ -23,7 +22,6 @@ MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS = [
     "src/MLNFillStyleLayer.h",
     "src/MLNHillshadeStyleLayer.h",
     "src/MLNRasterStyleLayer.h",
-    "src/MLNLocationIndicatorStyleLayer.h",
 ]
 
 MLN_GENERATED_DARWIN_STYLE_HEADERS = [
@@ -36,7 +34,6 @@ MLN_GENERATED_DARWIN_STYLE_HEADERS = [
     "src/MLNCircleStyleLayer_Private.h",
     "src/MLNFillStyleLayer_Private.h",
     "src/MLNHillshadeStyleLayer_Private.h",
-    "src/MLNLocationIndicatorStyleLayer_Private.h",
 ] + MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS
 
 MLN_GENERATED_DARWIN_TEST_CODE = [
@@ -50,7 +47,6 @@ MLN_GENERATED_DARWIN_TEST_CODE = [
     "test/MLNHillshadeStyleLayerTests.mm",
     "test/MLNLineStyleLayerTests.mm",
     "test/MLNSymbolStyleLayerTests.mm",
-    "test/MLNLocationIndicatorStyleLayerTests.mm",
 ]
 
 MLN_DARWIN_OBJC_HEADERS = [
@@ -172,7 +168,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/NSExpression+MLNPrivateAdditions.h",
     "src/NSPredicate+MLNPrivateAdditions.h",
     "src/MLNPluginStyleLayer_Private.h",
-    "src/MLNStyleFilter_Private.h",
+    "src/MLNStyleFilter_Private.h"
 ]
 
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [

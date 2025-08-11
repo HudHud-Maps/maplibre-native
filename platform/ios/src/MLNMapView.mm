@@ -87,7 +87,6 @@
 #import "MLNPluginProtocolHandler.h"
 #import "MLNStyleLayerManager.h"
 #include "MLNPluginStyleLayer_Private.h"
-#import "MLNLocationIndicatorUserLocationAnnotationView.h"
 #include "MLNStyleFilter.h"
 #include "MLNStyleFilter_Private.h"
 
@@ -648,7 +647,6 @@ public:
     }
     MLNLogDebug(@"Setting styleURL: %@", styleURL);
     styleURL = styleURL.mgl_URLByStandardizingScheme;
-    [self removeLocationIndicatorLayer];
     self.style = nil;
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
 }
@@ -666,15 +664,8 @@ public:
 - (IBAction)reloadStyle:(__unused id)sender {
     MLNLogInfo(@"Reloading style.");
     NSURL *styleURL = self.styleURL;
-    [self removeLocationIndicatorLayer];
     self.mbglMap.getStyle().loadURL("");
     self.styleURL = styleURL;
-}
-
-- (void)removeLocationIndicatorLayer {
-    if (self.userLocationAnnotationView && [self.userLocationAnnotationView isKindOfClass:[MLNLocationIndicatorUserLocationAnnotationView class]]) {
-        [(MLNLocationIndicatorUserLocationAnnotationView*)self.userLocationAnnotationView removeLayer];
-    }
 }
 
 - (mbgl::Map &)mbglMap
@@ -1460,11 +1451,6 @@ public:
 
     // Compass, logo and attribution button constraints needs to be updated.z
     [self installConstraints];
-}
-
-- (void)toggleTransform
-{
-    self.mbglMap.toggleTransform();
 }
 
 /// Returns the frame of inset content within the map view.
@@ -2278,6 +2264,7 @@ public:
 
         [self notifyGestureDidEndWithDrift:drift];
     }
+
 }
 
 - (void)handlePinchGesture:(UIPinchGestureRecognizer *)pinch
@@ -2454,6 +2441,7 @@ public:
         }
 
         [self cameraIsChanging];
+
         // Trigger a light haptic feedback event when the user rotates to due north.
         if (@available(iOS 10.0, *))
         {
@@ -2779,6 +2767,7 @@ public:
             }
 
             [self cameraIsChanging];
+
         }
 
 
@@ -3321,16 +3310,6 @@ static void *windowScreenContext = &windowScreenContext;
 -(double)tileLodZoomShift
 {
     return _mbglMap->getTileLodZoomShift();
-}
-
--(void)setFrustumOffset:(UIEdgeInsets)frustomOffset
-{
-    _mbglMap->setFrustumOffset(MLNEdgeInsetsFromNSEdgeInsets(frustomOffset));
-}
-
--(UIEdgeInsets)frustumOffset
-{
-    return NSEdgeInsetsFromMLNEdgeInsets(_mbglMap->getFrustumOffset());
 }
 
 // MARK: - Accessibility -
@@ -4489,7 +4468,7 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)cancelTransitions {
-    if (!_mbglMap || self.concurrentAnimations)
+    if (!_mbglMap)
     {
         return;
     }
@@ -6077,32 +6056,6 @@ static void *windowScreenContext = &windowScreenContext;
     return dictionary[@"MLNAccuracyAuthorizationDescription"];
 }
 
-- (void)createUserLocationAnnotationView {
-    MLNUserLocationAnnotationView *userLocationAnnotationView;
-
-    if ([self.delegate respondsToSelector:@selector(mapView:viewForAnnotation:)])
-    {
-        userLocationAnnotationView = (MLNUserLocationAnnotationView *)[self.delegate mapView:self viewForAnnotation:self.userLocation];
-        if (userLocationAnnotationView && ! [userLocationAnnotationView isKindOfClass:MLNUserLocationAnnotationView.class])
-        {
-            [NSException raise:MLNUserLocationAnnotationTypeException
-                        format:@"User location annotation view must be a kind of MLNUserLocationAnnotationView. %@", userLocationAnnotationView.debugDescription];
-        }
-    }
-
-    if (self.userLocationAnnotationView) {
-        [self.userLocationAnnotationView removeFromSuperview];
-    }
-    self.userLocationAnnotationView = userLocationAnnotationView ?: self.useLocationIndicatorLayer ? [[MLNLocationIndicatorUserLocationAnnotationView alloc] init] : [[MLNFaux3DUserLocationAnnotationView alloc] init];
-    self.userLocationAnnotationView.mapView = self;
-    self.userLocationAnnotationView.userLocation = self.userLocation;
-
-    self.userLocationAnnotationView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin |
-                                                        UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
-
-    [self.userLocationAnnotationView update];
-}
-
 - (void)setShowsUserLocation:(BOOL)showsUserLocation
 {
     MLNLogDebug(@"Setting showsUserLocation: %@", MLNStringFromBOOL(showsUserLocation));
@@ -6118,7 +6071,25 @@ static void *windowScreenContext = &windowScreenContext;
         }
 
         self.userLocation = [[MLNUserLocation alloc] initWithMapView:self];
-        [self createUserLocationAnnotationView];
+
+        MLNUserLocationAnnotationView *userLocationAnnotationView;
+
+        if ([self.delegate respondsToSelector:@selector(mapView:viewForAnnotation:)])
+        {
+            userLocationAnnotationView = (MLNUserLocationAnnotationView *)[self.delegate mapView:self viewForAnnotation:self.userLocation];
+            if (userLocationAnnotationView && ! [userLocationAnnotationView isKindOfClass:MLNUserLocationAnnotationView.class])
+            {
+                [NSException raise:MLNUserLocationAnnotationTypeException
+                            format:@"User location annotation view must be a kind of MLNUserLocationAnnotationView. %@", userLocationAnnotationView.debugDescription];
+            }
+        }
+
+        self.userLocationAnnotationView = userLocationAnnotationView ?: [[MLNFaux3DUserLocationAnnotationView alloc] init];
+        self.userLocationAnnotationView.mapView = self;
+        self.userLocationAnnotationView.userLocation = self.userLocation;
+
+        self.userLocationAnnotationView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin |
+                                                            UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
 
         [self validateLocationServices];
     }

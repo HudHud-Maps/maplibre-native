@@ -12,10 +12,6 @@ on:
     branches:
       - "*"
 
-permissions:
-  contents: write
-  actions: write
-
 concurrency:
   # cancel jobs on PRs only
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,7 +30,7 @@ jobs:
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
+        uses: tj-actions/changed-files@v46
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -356,7 +352,7 @@ jobs:
       - name: VERSION file changed
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: version-file-android-changed
-        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
+        uses: tj-actions/changed-files@v46
         with:
           files: platform/android/VERSION
 

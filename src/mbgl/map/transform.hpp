@@ -6,7 +6,6 @@
 #include <mbgl/map/mode.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/util/chrono.hpp>
-#include <mbgl/util/constants.hpp>
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
@@ -31,9 +30,7 @@ public:
     virtual void onCameraDidChange(MapObserver::CameraChangeMode) {}
 };
 
-double normalizeAngle(double, double);
-
-class Transform {
+class Transform : private util::noncopyable {
 public:
     Transform(TransformObserver& = TransformObserver::nullObserver(),
               ConstrainMode = ConstrainMode::HeightOnly,
@@ -42,8 +39,6 @@ public:
     Transform(const TransformState& state_)
         : observer(TransformObserver::nullObserver()),
           state(state_) {}
-
-    virtual ~Transform() = default;
 
     // Map view
     void resize(Size size);
@@ -57,14 +52,14 @@ public:
     /** Asynchronously transitions all specified camera options linearly along
         an optional time curve. However, center coordinate is not transitioned
         linearly as, instead, ground speed is kept linear.*/
-    virtual void easeTo(const CameraOptions&, const AnimationOptions& = {});
+    void easeTo(const CameraOptions&, const AnimationOptions& = {});
     /** Asynchronously zooms out, pans, and zooms back into the given camera
         along a great circle, as though the viewer is riding a supersonic
         jetcopter.
         Parameter linearZoomInterpolation: when true, there is no additional
         zooming out as zoom is linearly interpolated from current to given
         camera zoom. This is used for easeTo.*/
-    virtual void flyTo(const CameraOptions&, const AnimationOptions& = {}, bool linearZoomInterpolation = false);
+    void flyTo(const CameraOptions&, const AnimationOptions& = {}, bool linearZoomInterpolation = false);
 
     // Position
 
@@ -82,9 +77,6 @@ public:
 
     void setMinPitch(double);
     void setMaxPitch(double);
-
-    void setFrustumOffset(const EdgeInsets&);
-    EdgeInsets getFrustumOffset();
 
     // Zoom
 
@@ -117,11 +109,11 @@ public:
     ProjectionMode getProjectionMode() const;
 
     // Transitions
-    virtual bool inTransition() const;
-    virtual void updateTransitions(const TimePoint& now);
+    bool inTransition() const;
+    void updateTransitions(const TimePoint& now);
     TimePoint getTransitionStart() const { return transitionStart; }
     Duration getTransitionDuration() const { return transitionDuration; }
-    virtual void cancelTransitions();
+    void cancelTransitions();
 
     // Gesture
     void setGestureInProgress(bool);
@@ -140,14 +132,14 @@ public:
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);
 
-protected:
+private:
     TransformObserver& observer;
     TransformState state;
 
-    virtual void startTransition(const CameraOptions&,
-                                 const AnimationOptions&,
-                                 const std::function<void(double)>&,
-                                 const Duration&);
+    void startTransition(const CameraOptions&,
+                         const AnimationOptions&,
+                         const std::function<void(double)>&,
+                         const Duration&);
 
     // We don't want to show horizon: limit max pitch based on edge insets.
     double getMaxPitchForEdgeInsets(const EdgeInsets& insets) const;
