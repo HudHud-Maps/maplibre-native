@@ -325,10 +325,6 @@ public:
     jni::jboolean isRenderingStatsViewEnabled(JNIEnv&);
     void enableRenderingStatsView(JNIEnv&, jni::jboolean);
 
-    void toggleTransform(JNIEnv&);
-
-    void setFrustumOffset(JNIEnv&, const jni::Object<RectF>&);
-
     // Plugins
     void addPluginFileSource(JNIEnv&, const jni::Object<mbgl::android::PluginFileSource>&);
 

@@ -1,5 +1,4 @@
 #include <mbgl/map/map_options.hpp>
-#include <mbgl/util/geo.hpp>
 
 namespace mbgl {
 

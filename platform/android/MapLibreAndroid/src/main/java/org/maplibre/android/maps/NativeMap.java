@@ -271,10 +271,6 @@ interface NativeMap {
 
   void enableRenderingStatsView(boolean value);
 
-  void toggleTransform();
-
-  void setFrustumOffset(RectF offset);
-
   void addPluginProtocolHandler(PluginProtocolHandler protocolHandler);
 
   void setSwapBehaviorFlush(boolean flush);

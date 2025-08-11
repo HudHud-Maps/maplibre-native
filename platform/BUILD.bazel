@@ -5,8 +5,6 @@ load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 objc_library(
     name = "macos-objcpp",
     srcs = [
-        "//platform/darwin:darwin_gltf_hdrs",
-        "//platform/darwin:darwin_gltf_srcs",
         "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
         "//platform/darwin:darwin_objcpp_srcs",
         "//platform/darwin:darwin_private_hdrs",
@@ -39,7 +37,6 @@ objc_library(
         "CoreLocation",
         "AppKit",
         "SystemConfiguration",
-        "Accelerate",
     ],
     visibility = ["//visibility:public"],
     deps = [
@@ -138,7 +135,6 @@ objc_library(
 objc_library(
     name = "objc-sdk",
     srcs = [
-        "//platform/darwin:darwin_gltf_srcs",
         "//platform/darwin:darwin_objc_srcs",
         "//platform/ios:ios_objc_srcs",
         "//platform/ios:ios_private_hdrs",
@@ -165,7 +161,6 @@ objc_library(
         "CoreGraphics",
         "CoreLocation",
         "QuartzCore",
-        "Accelerate",
     ],
     deps = [
         ":objc-headers",
@@ -199,7 +194,6 @@ objc_library(
 objc_library(
     name = "ios-sdk",
     hdrs = [
-        "//platform/darwin:darwin_gltf_hdrs",
         "//platform/darwin:darwin_objc_hdrs",
         "//platform/darwin:generated_style_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
@@ -273,8 +267,6 @@ objc_library(
 objc_library(
     name = "iosapp",
     srcs = [
-        "//platform/darwin:app/CustomStyleLayerExample.h",
-        "//platform/darwin:app/CustomStyleLayerExample.m",
         "//platform/darwin:app/PluginLayerExample.h",
         "//platform/darwin:app/PluginLayerExample.mm",
         "//platform/darwin:app/PluginProtocolExample.h",
@@ -283,6 +275,8 @@ objc_library(
         "//platform/darwin:app/StyleFilterExample.mm",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.h",
         "//platform/darwin:app/PluginLayerExampleMetalRendering.mm",
+        "//platform/darwin:app/CustomStyleLayerExample.h",
+        "//platform/darwin:app/CustomStyleLayerExample.m",
         "//platform/ios:ios_app_srcs",
     ],
     defines = ["GLES_SILENCE_DEPRECATION"],

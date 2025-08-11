@@ -47,8 +47,6 @@ final class LocationCameraController {
   private LatLng lastLocation;
   private boolean isEnabled;
 
-  private boolean concurrentAnimations;
-
   LocationCameraController(
     Context context,
     MapLibreMap maplibreMap,
@@ -180,14 +178,12 @@ final class LocationCameraController {
         transform.moveCamera(
             maplibreMap,
           update,
-          true,
           callback);
       } else {
         transform.animateCamera(
             maplibreMap,
           update,
           (int) transitionDuration,
-          true,
           callback);
       }
     } else {
@@ -206,8 +202,7 @@ final class LocationCameraController {
       return;
     }
 
-    boolean shouldCancelTransitions = !(options.concurrentCameraAnimation() && isLocationTracking());
-    transform.moveCamera(maplibreMap, CameraUpdateFactory.bearingTo(bearing), shouldCancelTransitions, null);
+    transform.moveCamera(maplibreMap, CameraUpdateFactory.bearingTo(bearing), null);
     onCameraMoveInvalidateListener.onInvalidateCameraMove();
   }
 
@@ -215,10 +210,8 @@ final class LocationCameraController {
     if (isTransitioning) {
       return;
     }
-
     lastLocation = latLng;
-    boolean shouldCancelTransitions = !(options.concurrentCameraAnimation() && isLocationTracking());
-    transform.moveCamera(maplibreMap, CameraUpdateFactory.newLatLng(latLng), shouldCancelTransitions, null);
+    transform.moveCamera(maplibreMap, CameraUpdateFactory.newLatLng(latLng), null);
     onCameraMoveInvalidateListener.onInvalidateCameraMove();
   }
 
@@ -227,8 +220,7 @@ final class LocationCameraController {
       return;
     }
 
-    boolean shouldCancelTransitions = !(options.concurrentCameraAnimation() && isLocationTracking());
-    transform.moveCamera(maplibreMap, CameraUpdateFactory.zoomTo(zoom), shouldCancelTransitions, null);
+    transform.moveCamera(maplibreMap, CameraUpdateFactory.zoomTo(zoom), null);
     onCameraMoveInvalidateListener.onInvalidateCameraMove();
   }
 
@@ -237,8 +229,7 @@ final class LocationCameraController {
       return;
     }
 
-    boolean shouldCancelTransitions = !(options.concurrentCameraAnimation() && isLocationTracking());
-    transform.moveCamera(maplibreMap, CameraUpdateFactory.paddingTo(padding), true, null);
+    transform.moveCamera(maplibreMap, CameraUpdateFactory.paddingTo(padding), null);
     onCameraMoveInvalidateListener.onInvalidateCameraMove();
   }
 
@@ -247,8 +238,7 @@ final class LocationCameraController {
       return;
     }
 
-    boolean shouldCancelTransitions = !(options.concurrentCameraAnimation() && isLocationTracking());
-    transform.moveCamera(maplibreMap, CameraUpdateFactory.tiltTo(tilt), shouldCancelTransitions, null);
+    transform.moveCamera(maplibreMap, CameraUpdateFactory.tiltTo(tilt), null);
     onCameraMoveInvalidateListener.onInvalidateCameraMove();
   }
 

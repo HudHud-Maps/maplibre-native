@@ -59,7 +59,7 @@ public class Transform implements MapView.OnCameraDidChangeListener {
   void initialise(@NonNull MapLibreMap maplibreMap, @NonNull MapLibreMapOptions options) {
     CameraPosition position = options.getCamera();
     if (position != null && !position.equals(CameraPosition.DEFAULT)) {
-      moveCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(position), true, null);
+      moveCamera(maplibreMap, CameraUpdateFactory.newCameraPosition(position), null);
     }
     setMinZoom(options.getMinZoomPreference());
     setMaxZoom(options.getMaxZoomPreference());
@@ -102,23 +102,15 @@ public class Transform implements MapView.OnCameraDidChangeListener {
     }
   }
 
-  @UiThread
-  public void moveCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update,
-                         @Nullable final MapLibreMap.CancelableCallback callback) {
-    moveCamera(maplibreMap, update, true, callback);
-  }
-
   /**
    * Internal use.
    */
   @UiThread
-  public void moveCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, boolean shouldCancelTransitions,
+  public void moveCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update,
                                @Nullable final MapLibreMap.CancelableCallback callback) {
     CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
-      if (shouldCancelTransitions) {
-        cancelTransitions();
-      }
+      cancelTransitions();
       cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
       nativeMap.jumpTo(cameraPosition.target, cameraPosition.zoom, cameraPosition.tilt, cameraPosition.bearing,
         cameraPosition.padding);
@@ -139,20 +131,11 @@ public class Transform implements MapView.OnCameraDidChangeListener {
 
   @UiThread
   void easeCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
-                  boolean easingInterpolator,
-                  @Nullable final MapLibreMap.CancelableCallback callback) {
-    easeCamera(maplibreMap, update, durationMs, easingInterpolator, true, callback);
-  }
-
-  @UiThread
-  void easeCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
-                        boolean easingInterpolator, boolean shouldCancelTransitions,
+                        boolean easingInterpolator,
                         @Nullable final MapLibreMap.CancelableCallback callback) {
     CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
-      if (shouldCancelTransitions) {
-        cancelTransitions();
-      }
+      cancelTransitions();
       cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
 
       if (callback != null) {
@@ -166,24 +149,15 @@ public class Transform implements MapView.OnCameraDidChangeListener {
     }
   }
 
-  @UiThread
-  public void animateCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
-                            @Nullable final MapLibreMap.CancelableCallback callback) {
-    animateCamera(maplibreMap, update, durationMs, true, callback);
-  }
-
   /**
    * Internal use.
    */
   @UiThread
   public void animateCamera(@NonNull MapLibreMap maplibreMap, CameraUpdate update, int durationMs,
-                                  boolean shouldCancelTransitions,
                                   @Nullable final MapLibreMap.CancelableCallback callback) {
     CameraPosition cameraPosition = update.getCameraPosition(maplibreMap);
     if (isValidCameraPosition(cameraPosition)) {
-      if (shouldCancelTransitions) {
-        cancelTransitions();
-      }
+      cancelTransitions();
       cameraChangeDispatcher.onCameraMoveStarted(OnCameraMoveStartedListener.REASON_API_ANIMATION);
 
       if (callback != null) {

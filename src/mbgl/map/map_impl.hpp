@@ -13,9 +13,6 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/util/size.hpp>
 #include <mbgl/tile/tile_operation.hpp>
-#include <mbgl/map/transform_active.hpp>
-
-#include <numbers>
 
 #include <numbers>
 
@@ -88,8 +85,7 @@ public:
     RendererFrontend& rendererFrontend;
     std::unique_ptr<util::ActionJournal> actionJournal;
 
-    std::unique_ptr<Transform> transform;
-    bool using_active_transform = false;
+    Transform transform;
 
     const MapMode mode;
     const float pixelRatio;

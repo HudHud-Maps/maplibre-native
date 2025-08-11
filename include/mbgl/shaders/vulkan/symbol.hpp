@@ -52,7 +52,6 @@ struct SymbolDrawableUBO {
     bool pitch_with_map;
     bool is_size_zoom_constant;
     bool is_size_feature_constant;
-    bool is_offset;
 
     float size_t;
     float size;
@@ -107,9 +106,7 @@ void main() {
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    if (!drawable.is_offset) {
-        size *= perspective_ratio;
-    }
+    size *= perspective_ratio;
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -259,7 +256,6 @@ struct SymbolDrawableUBO {
     bool pitch_with_map;
     bool is_size_zoom_constant;
     bool is_size_feature_constant;
-    bool is_offset;
 
     float size_t;
     float size;
@@ -339,9 +335,7 @@ void main() {
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    if (!drawable.is_offset) {
-        size *= perspective_ratio;
-    }
+    size *= perspective_ratio;
 
     const float fontScale = drawable.is_text_prop ? size / 24.0 : size;
 
@@ -559,7 +553,6 @@ struct SymbolDrawableUBO {
     bool pitch_with_map;
     bool is_size_zoom_constant;
     bool is_size_feature_constant;
-    bool is_offset;
 
     float size_t;
     float size;
@@ -641,9 +634,7 @@ void main() {
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
             4.0);
 
-    if (!drawable.is_offset) {
-        size *= perspective_ratio;
-    }
+    size *= perspective_ratio;
 
     const float fontScale = size / 24.0;
 

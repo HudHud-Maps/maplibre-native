@@ -23,7 +23,6 @@ struct CustomLayerRenderParameters {
     double pitch;
     double fieldOfView;
     std::array<double, 16> projectionMatrix;
-    std::array<double, 16> nearClippedProjMatrix;
 
     CustomLayerRenderParameters(const PaintParameters&);
 };

@@ -144,7 +144,6 @@ public class LocationComponentOptions implements Parcelable {
   private float pulseAlpha;
   @Nullable
   private Interpolator pulseInterpolator;
-  private Boolean concurrentCameraAnimation;
 
   public LocationComponentOptions(
     float accuracyAlpha,
@@ -187,8 +186,7 @@ public class LocationComponentOptions implements Parcelable {
     float pulseSingleDuration,
     float pulseMaxRadius,
     float pulseAlpha,
-    @Nullable Interpolator pulseInterpolator,
-    Boolean concurrentCameraAnimation) {
+    @Nullable Interpolator pulseInterpolator) {
     this.accuracyAlpha = accuracyAlpha;
     this.accuracyColor = accuracyColor;
     this.backgroundDrawableStale = backgroundDrawableStale;
@@ -233,7 +231,6 @@ public class LocationComponentOptions implements Parcelable {
     this.pulseMaxRadius = pulseMaxRadius;
     this.pulseAlpha = pulseAlpha;
     this.pulseInterpolator = pulseInterpolator;
-    this.concurrentCameraAnimation = concurrentCameraAnimation;
   }
 
   /**
@@ -375,9 +372,6 @@ public class LocationComponentOptions implements Parcelable {
 
     builder.pulseAlpha = typedArray.getFloat(
       R.styleable.maplibre_LocationComponent_maplibre_pulsingLocationCircleAlpha, CIRCLE_PULSING_ALPHA_DEFAULT);
-
-    builder.concurrentCameraAnimation = typedArray.getBoolean(
-      R.styleable.maplibre_LocationComponent_maplibre_concurrentCameraAnimation, false);
 
     typedArray.recycle();
 
@@ -898,10 +892,6 @@ public class LocationComponentOptions implements Parcelable {
     return pulseInterpolator;
   }
 
-  public Boolean concurrentCameraAnimation() {
-    return concurrentCameraAnimation;
-  }
-
   @NonNull
   @Override
   public String toString() {
@@ -944,7 +934,6 @@ public class LocationComponentOptions implements Parcelable {
       + "pulseSingleDuration=" + pulseSingleDuration
       + "pulseMaxRadius=" + pulseMaxRadius
       + "pulseAlpha=" + pulseAlpha
-      + "concurrentCameraAnimation=" + concurrentCameraAnimation
       + "}";
   }
 
@@ -1092,10 +1081,6 @@ public class LocationComponentOptions implements Parcelable {
       return false;
     }
 
-    if (concurrentCameraAnimation != options.concurrentCameraAnimation) {
-      return false;
-    }
-
     return layerBelow != null ? layerBelow.equals(options.layerBelow) : options.layerBelow == null;
   }
 
@@ -1145,7 +1130,6 @@ public class LocationComponentOptions implements Parcelable {
     result = 31 * result + (pulseSingleDuration != +0.0f ? Float.floatToIntBits(pulseSingleDuration) : 0);
     result = 31 * result + (pulseMaxRadius != +0.0f ? Float.floatToIntBits(pulseMaxRadius) : 0);
     result = 31 * result + (pulseAlpha != +0.0f ? Float.floatToIntBits(pulseAlpha) : 0);
-    result = 31 * result + (concurrentCameraAnimation ? 1 : 0);
     return result;
   }
 
@@ -1196,7 +1180,6 @@ public class LocationComponentOptions implements Parcelable {
     dest.writeFloat(this.pulseSingleDuration);
     dest.writeFloat(this.pulseMaxRadius);
     dest.writeFloat(this.pulseAlpha);
-    dest.writeByte(this.concurrentCameraAnimation ? (byte) 1 : (byte) 0);
   }
 
   protected LocationComponentOptions(Parcel in) {
@@ -1240,7 +1223,6 @@ public class LocationComponentOptions implements Parcelable {
     this.pulseSingleDuration = in.readFloat();
     this.pulseMaxRadius = in.readFloat();
     this.pulseAlpha = in.readFloat();
-    this.concurrentCameraAnimation = in.readByte() != 0;
   }
 
   public static final Parcelable.Creator<LocationComponentOptions> CREATOR =
@@ -1367,7 +1349,6 @@ public class LocationComponentOptions implements Parcelable {
     private float pulseAlpha;
     @Nullable
     private Interpolator pulseInterpolator;
-    private Boolean concurrentCameraAnimation;
 
     Builder() {
     }
@@ -1414,7 +1395,6 @@ public class LocationComponentOptions implements Parcelable {
       this.pulseMaxRadius = source.pulseMaxRadius;
       this.pulseAlpha = source.pulseAlpha;
       this.pulseInterpolator = source.pulseInterpolator;
-      this.concurrentCameraAnimation = source.concurrentCameraAnimation;
     }
 
     /**
@@ -1993,11 +1973,6 @@ public class LocationComponentOptions implements Parcelable {
       return this;
     }
 
-    public LocationComponentOptions.Builder concurrentCameraAnimation(Boolean concurrentCameraAnimation) {
-      this.concurrentCameraAnimation = concurrentCameraAnimation;
-      return this;
-    }
-
     @Nullable
     LocationComponentOptions autoBuild() {
       String missing = "";
@@ -2099,8 +2074,7 @@ public class LocationComponentOptions implements Parcelable {
         this.pulseSingleDuration,
         this.pulseMaxRadius,
         this.pulseAlpha,
-        this.pulseInterpolator,
-        this.concurrentCameraAnimation);
+        this.pulseInterpolator);
     }
   }
 }

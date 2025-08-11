@@ -406,7 +406,7 @@
 
 - (void)testTransition
 {
-    MLNTransition transitionTest = MLNTransitionMake(5, 4, kCAMediaTimingFunctionDefault);
+    MLNTransition transitionTest = MLNTransitionMake(5, 4);
 
     self.style.transition = transitionTest;
 

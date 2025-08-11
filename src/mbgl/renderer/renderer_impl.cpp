@@ -15,7 +15,6 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/program_parameters.hpp>
-#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
@@ -185,34 +184,21 @@ void Renderer::Impl::render(const RenderTree& renderTree, const std::shared_ptr<
 
     observer->onWillStartRenderingFrame();
 
-    const TransformState& state = renderTreeParameters.transformParams.state;
-    const Size& size = state.getSize();
-    const EdgeInsets& frustumOffset = state.getFrustumOffset();
-    const gfx::ScissorRect scissorRect = {
-        static_cast<int32_t>(frustumOffset.left() * pixelRatio),
-        static_cast<int32_t>(frustumOffset.top() * pixelRatio),
-        static_cast<uint32_t>((size.width - (frustumOffset.left() + frustumOffset.right())) * pixelRatio),
-        static_cast<uint32_t>((size.height - (frustumOffset.top() + frustumOffset.bottom())) * pixelRatio),
-    };
-
-    PaintParameters parameters{
-        context,
-        pixelRatio,
-        backend,
-        renderTreeParameters.light,
-        renderTreeParameters.mapMode,
-        renderTreeParameters.debugOptions,
-        renderTreeParameters.timePoint,
-        renderTreeParameters.transformParams,
-        *staticData,
-        renderTree.getLineAtlas(),
-        renderTree.getPatternAtlas(),
-        frameCount,
-        updateParameters->tileLodMinRadius,
-        updateParameters->tileLodScale,
-        updateParameters->tileLodPitchThreshold,
-        scissorRect,
-    };
+    PaintParameters parameters{context,
+                               pixelRatio,
+                               backend,
+                               renderTreeParameters.light,
+                               renderTreeParameters.mapMode,
+                               renderTreeParameters.debugOptions,
+                               renderTreeParameters.timePoint,
+                               renderTreeParameters.transformParams,
+                               *staticData,
+                               renderTree.getLineAtlas(),
+                               renderTree.getPatternAtlas(),
+                               frameCount,
+                               updateParameters->tileLodMinRadius,
+                               updateParameters->tileLodScale,
+                               updateParameters->tileLodPitchThreshold};
 
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;

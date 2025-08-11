@@ -85,10 +85,6 @@ struct TransformStateProperties {
         viewPortMode = val;
         return *this;
     }
-    TransformStateProperties withFrustumOffset(const std::optional<EdgeInsets>& val) {
-        frustumOffset = val;
-        return *this;
-    }
 
     std::optional<double> x;
     std::optional<double> y;
@@ -106,7 +102,6 @@ struct TransformStateProperties {
     std::optional<ConstrainMode> constrain;
     std::optional<NorthOrientation> northOrientation;
     std::optional<ViewportMode> viewPortMode;
-    std::optional<EdgeInsets> frustumOffset;
 };
 
 class TransformState {
@@ -122,9 +117,6 @@ public:
     // Dimensions
     Size getSize() const;
     void setSize(const Size& size_);
-
-    EdgeInsets getFrustumOffset() const;
-    void setFrustumOffset(const EdgeInsets& frustumOffset_);
 
     // North Orientation
     NorthOrientation getNorthOrientation() const;
@@ -254,7 +246,6 @@ private:
 
     // logical dimensions
     Size size;
-    EdgeInsets frustumOffset;
 
     mat4 coordinatePointMatrix(const mat4& projMatrix) const;
     mat4 getPixelMatrix() const;
