@@ -188,26 +188,14 @@ void BufferResource::updateVertexBindOffset(const MTLRenderCommandEncoderPtr& en
                                             std::size_t offset,
                                             std::size_t index,
                                             std::size_t size_) const noexcept {
-    // If we're using a MTLBuffer, just update the offset.
-    // The documentation for `setVertexBufferOffset` indicates that it should work for buffers
-    // assigned using `setVertexBytes` but, in practice, it produces a validation failure:
-    // `Set Vertex Buffer Offset Validation index(1) must have an existing buffer.`
-    if (buffer.get()) {
-        encoder->setVertexBufferOffset(offset, index);
-    } else {
-        bindVertex(encoder, offset, index, size_);
-    }
+    bindVertex(encoder, offset, index, size_);
 }
 
 void BufferResource::updateFragmentBindOffset(const MTLRenderCommandEncoderPtr& encoder,
                                               std::size_t offset,
                                               std::size_t index,
                                               std::size_t size_) const noexcept {
-    if (buffer.get()) {
-        encoder->setFragmentBufferOffset(offset, index);
-    } else {
-        bindFragment(encoder, offset, index, size_);
-    }
+    bindFragment(encoder, offset, index, size_);
 }
 
 } // namespace mtl
