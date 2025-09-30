@@ -4,6 +4,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/plugin/feature_collection.hpp>
+#include <mbgl/util/rect.hpp>
 
 namespace mbgl {
 
@@ -36,6 +37,11 @@ public:
         std::function<void(const std::shared_ptr<plugin::FeatureCollection> featureCollection)>;
     using OnFeatureCollectionUnloaded =
         std::function<void(const std::shared_ptr<plugin::FeatureCollection> featureCollection)>;
+    using OnSpriteProperties = std::function<std::vector<plugin::FeatureSymbolProperty>(void)>;
+    using OnGlyphProperties = std::function<std::vector<plugin::FeatureSymbolProperty>(void)>;
+    using OnBaseFontStack = std::function<std::vector<std::string>(void)>;
+
+    using OnSpriteLoaded = std::function<void(const std::string&, const Rect<uint16_t>&)>;
 
     void* _platformReference = nullptr;
 

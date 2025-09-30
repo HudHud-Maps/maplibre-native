@@ -53,7 +53,7 @@ void FeatureCollectionBucket::addFeature(const GeometryTileFeature& tileFeature,
                                          const GeometryCollection& geometeryCollection,
                                          [[maybe_unused]] const mbgl::ImagePositions& imagePositions,
                                          [[maybe_unused]] const PatternLayerMap& patternLayerMap,
-                                         [[maybe_unused]] std::size_t size,
+                                         [[maybe_unused]] std::size_t index,
                                          const CanonicalTileID& tileID) {
     std::shared_ptr<plugin::Feature> tempFeature = std::make_shared<plugin::Feature>();
 
@@ -106,7 +106,8 @@ void FeatureCollectionBucket::addFeature(const GeometryTileFeature& tileFeature,
             double lat = 0;
             double lon = 0;
             geometryToLatLon(p1, tileID.x, tileID.y, tileID.z, lat, lon);
-            c._coordinates.push_back(plugin::FeatureCoordinate(lat, lon));
+            auto feature = plugin::FeatureCoordinate(lat, lon, p1.x, p1.y);
+            c._coordinates.push_back(feature);
         }
         tempFeature->_featureCoordinates.push_back(c);
     }

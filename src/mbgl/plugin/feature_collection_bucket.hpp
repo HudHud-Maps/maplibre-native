@@ -43,6 +43,9 @@ public:
     // Feature collection is an list of features
     std::shared_ptr<mbgl::plugin::FeatureCollection> _featureCollection = nullptr;
     std::vector<Immutable<style::LayerProperties>> _layers;
+
+    plugin::SpriteToTexMapping _spriteIdToTex;
+    plugin::GlyphToTexMapping _glyphToTex;
 };
 
 } // namespace mbgl

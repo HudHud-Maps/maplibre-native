@@ -111,6 +111,18 @@ public:
         _featureCollectionUnloadedFunction = featureCollectionUnloadedFunction;
     }
 
+    void setSpritePropertiesFunction(OnSpriteProperties spritePropertiesFunction) {
+        _spritePropertiesFunction = spritePropertiesFunction;
+    }
+
+    void setGlphyPropertiesFunction(OnGlyphProperties glyphPropertiesFunction) {
+        _glyphPropertiesFunction = glyphPropertiesFunction;
+    }
+
+    void setBaseFontStackFunction(OnBaseFontStack baseFontStackFunction) {
+        _baseFontStackFunction = baseFontStackFunction;
+    }
+
     //! The property manager handles all of the custom properties for this layer type / instance
     PluginLayerPropertyManager _propertyManager;
 
@@ -133,6 +145,10 @@ public:
 
     //! Optional: Called when a feature colleciton is unloaded from the scene (tile goes out of scene/etc)
     OnFeatureCollectionUnloaded _featureCollectionUnloadedFunction;
+
+    OnSpriteProperties _spritePropertiesFunction;
+    OnGlyphProperties _glyphPropertiesFunction;
+    OnBaseFontStack _baseFontStackFunction;
 
 private:
     LayerTypeInfo _layerTypeInfo;
