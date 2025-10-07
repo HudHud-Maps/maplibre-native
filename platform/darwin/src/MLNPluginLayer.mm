@@ -64,12 +64,10 @@
 - (instancetype)initWithSymbolQuad:(const mbgl::SymbolQuad&)quad {
     self = [super init];
     if (self) {
-        _dimensions = @[
-            [NSValue valueWithCGPoint:CGPointMake(quad.tl.x, quad.tl.y)],
-            [NSValue valueWithCGPoint:CGPointMake(quad.tr.x, quad.tr.y)],
-            [NSValue valueWithCGPoint:CGPointMake(quad.bl.x, quad.bl.y)],
-            [NSValue valueWithCGPoint:CGPointMake(quad.br.x, quad.br.y)]
-        ];
+        _tl = CGPointMake(quad.tl.x, quad.tl.y);
+        _tr = CGPointMake(quad.tr.x, quad.tr.y);
+        _bl = CGPointMake(quad.bl.x, quad.bl.y);
+        _br = CGPointMake(quad.br.x, quad.br.y);
         _texCoords = CGRectMake(quad.tex.x, quad.tex.y, quad.tex.w, quad.tex.h);
         _offset = CGPointMake(quad.glyphOffset.x, quad.glyphOffset.y);
     }
@@ -83,7 +81,10 @@
 - (instancetype)initWithQuad:(MLNQuad *)quad {
     self = [super init];
     if (self) {
-        _dimensions = [quad.dimensions copy];
+        _tl = CGPointMake(quad.tl.x, quad.tl.y);
+        _tr = CGPointMake(quad.tr.x, quad.tr.y);
+        _bl = CGPointMake(quad.bl.x, quad.bl.y);
+        _br = CGPointMake(quad.br.x, quad.br.y);
         _texCoords = quad.texCoords;
         _offset = quad.offset;
     }

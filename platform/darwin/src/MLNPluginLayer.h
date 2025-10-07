@@ -53,7 +53,10 @@ MLN_EXPORT
 MLN_EXPORT
 @interface MLNQuad : NSObject
 
-@property NSArray *dimensions;
+@property CGPoint tl;
+@property CGPoint tr;
+@property CGPoint bl;
+@property CGPoint br;
 @property CGRect texCoords;
 @property CGPoint offset;
 
