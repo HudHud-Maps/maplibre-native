@@ -9,6 +9,8 @@
 #include <mbgl/text/shaping.hpp>
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/plugin/feature_collection_bucket.hpp>
+#include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_layer_properties.hpp>
 
 namespace mbgl {
 
@@ -20,6 +22,9 @@ PluginLayout::PluginLayout(const BucketParameters& parameters_,
       canonicalID(parameters_.tileID.canonical),
       parameters(parameters_),
       layers(layers_) {
+    const style::PluginLayer::Impl& leader = static_cast<const style::PluginLayer::Impl&>(
+        *static_cast<const style::PluginLayerProperties&>(*layers.at(0)).baseImpl);
+
     std::vector<plugin::FeatureSymbolProperty> spriteProperties;
     std::vector<plugin::FeatureSymbolProperty> glyphProperties;
     FontStack baseFontStack;
@@ -60,6 +65,10 @@ PluginLayout::PluginLayout(const BucketParameters& parameters_,
     const size_t featureCount = sourceLayer->featureCount();
     for (size_t i = 0; i < featureCount; ++i) {
         auto feature = sourceLayer->getFeature(i);
+        if (!leader.filter(style::expression::EvaluationContext(parameters.tileID.overscaledZ, feature.get())
+                               .withCanonicalTileID(&parameters.tileID.canonical))) {
+            continue;
+        }
 
         SymbolFeature ft(std::move(feature));
         ft.index = i;
