@@ -111,9 +111,11 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     std::vector<OverscaledTileID> panTiles;
 
     util::TileCoverParameters tileCoverParameters = {parameters.transformState,
-                                                     parameters.tileLodMinRadius,
-                                                     parameters.tileLodScale,
-                                                     parameters.tileLodPitchThreshold};
+        parameters.tileLodMinRadius,
+        parameters.tileLodScale,
+        parameters.tileLodPitchThreshold,
+        parameters.maxTileDistanceNM
+    };
 
     if (overscaledZoom >= zoomRange.min) {
         int32_t idealZoom = std::min<int32_t>(zoomRange.max, overscaledZoom);

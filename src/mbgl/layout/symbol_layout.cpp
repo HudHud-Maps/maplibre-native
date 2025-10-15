@@ -21,6 +21,10 @@
 
 #include <numbers>
 
+// TODO: Remove this
+#include <map>
+#include <iostream>
+
 using namespace std::numbers;
 
 namespace mbgl {
@@ -130,6 +134,16 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
       layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom)) {
     const SymbolLayer::Impl& leader = toSymbolLayerProperties(layers.at(0)).layerImpl();
 
+          static std::map<std::string, int> perLayerIteration;
+          int currentLayerIteration = 0;
+          if (perLayerIteration.count(leader.id) == 0) {
+              perLayerIteration[leader.id] = 0;
+          } else {
+              perLayerIteration[leader.id] = perLayerIteration[leader.id] + 1;
+              currentLayerIteration = perLayerIteration[leader.id];
+          }
+          std::cout << "SymbolLayout::SymbolLayout: Layer: " << leader.id << "; Iteration: " << currentLayerIteration << "\n";
+          
     textSize = leader.layout.get<TextSize>();
     iconSize = leader.layout.get<IconSize>();
     textRadialOffset = leader.layout.get<TextRadialOffset>();

@@ -21,6 +21,9 @@
 #include <mbgl/shaders/mtl/symbol.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
+// TODO: Remove
+#include <iostream>
+
 namespace mbgl {
 
 using namespace style;
@@ -56,6 +59,19 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         return;
     }
 
+    static std::map<std::string, int> layerGroupIterations;
+    int layerGroupIteration = 0;
+    auto layerGroupName = layerGroup.getName();
+    if (layerGroupIterations.count(layerGroupName) == 0) {
+        layerGroupIterations[layerGroupName] = 0;
+    } else {
+        layerGroupIterations[layerGroupName] = layerGroupIterations[layerGroupName] + 1;
+        layerGroupIteration = layerGroupIterations[layerGroupName];
+    }
+    std::cout << "SymbolLayerTweaker::execute: " << layerGroupName << "; Iteration: " << layerGroupIteration << "\n";
+
+
+    
     auto& context = parameters.context;
     const auto& state = parameters.state;
     const auto& symbolLayerProperties = static_cast<const SymbolLayerProperties&>(*evaluatedProperties);
@@ -99,6 +115,14 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto isScreenSpace = screenSpaceProp.isConstant() ? screenSpaceProp.asConstant()
                                                             : SymbolScreenSpace::defaultValue();
 
+    if (layerGroupIteration > 5) {
+        if (layerGroupIteration % 50 != 0) {
+            return;
+        }
+    }
+    std::cout << "  -> SymbolLayerTweaker::execute: " << layerGroupName << "; Iteration: " << layerGroupIteration << "\n";
+
+    
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;

@@ -604,6 +604,14 @@ double Map::getTileLodZoomShift() const {
     return impl->tileLodZoomShift;
 }
 
+void Map::setMaxTileDistanceNM(double distance) {
+    impl->maxTileDistanceNM = distance;
+}
+
+double Map::getMaxTileDistanceNM() const {
+    return impl->maxTileDistanceNM;
+}
+
 ClientOptions Map::getClientOptions() const {
     return impl->fileSource ? impl->fileSource->getClientOptions() : ClientOptions();
 }

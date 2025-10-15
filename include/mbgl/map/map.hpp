@@ -196,6 +196,8 @@ public:
     double getTileLodPitchThreshold() const;
     void setTileLodZoomShift(double shift);
     double getTileLodZoomShift() const;
+    void setMaxTileDistanceNM(double distance);
+    double getMaxTileDistanceNM() const;
 
     ClientOptions getClientOptions() const;
 

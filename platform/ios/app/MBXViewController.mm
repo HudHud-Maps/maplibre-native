@@ -355,6 +355,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             }
         }
     }];
+    
+    self.mapView.maxTileDistanceNM = 0;
+    
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations

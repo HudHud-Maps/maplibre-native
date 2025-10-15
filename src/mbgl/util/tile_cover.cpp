@@ -9,6 +9,8 @@
 #include <functional>
 #include <list>
 
+#include <iostream>
+
 using namespace std::numbers;
 
 namespace mbgl {
@@ -155,6 +157,53 @@ int32_t coveringZoomLevel(double zoom, style::SourceType type, uint16_t size) no
     }
 }
 
+constexpr double PI = 3.14159265358979323846;
+constexpr double DEG_PER_RAD = 180.0 / PI;
+constexpr double RAD_PER_DEG = PI / 180.0;
+constexpr double EARTH_RADIUS_NM = 3440.065;
+
+// Converts Web Mercator tile x/y/z to lat/lon bounding box
+// Returns: (minLat, minLon, maxLat, maxLon)
+std::tuple<double, double, double, double> tileBounds(int x, int y, int zoom) {
+    int n = 1 << zoom;
+
+    // Longitude (x axis)
+    double lon_min = x / static_cast<double>(n) * 360.0 - 180.0;
+    double lon_max = (x + 1) / static_cast<double>(n) * 360.0 - 180.0;
+
+    // Latitude (y axis), requires inverse Mercator projection
+    auto mercToLat = [](double y_tile, int n_tiles) {
+        double y = PI * (1 - 2 * y_tile / n_tiles);
+        return DEG_PER_RAD * std::atan(std::sinh(y));
+    };
+
+    double lat_max = mercToLat(y, n);
+    double lat_min = mercToLat(y + 1, n);
+
+    return {lat_min, lon_min, lat_max, lon_max};
+}
+
+// Computes distance between two lat/lon points in nautical miles
+double haversine_nm(double lat1, double lon1, double lat2, double lon2) {
+    // Convert degrees to radians
+    lat1 *= RAD_PER_DEG;
+    lon1 *= RAD_PER_DEG;
+    lat2 *= RAD_PER_DEG;
+    lon2 *= RAD_PER_DEG;
+
+    // Haversine formula
+    double dlat = lat2 - lat1;
+    double dlon = lon2 - lon1;
+
+    double a = std::pow(std::sin(dlat / 2), 2) +
+               std::cos(lat1) * std::cos(lat2) *
+               std::pow(std::sin(dlon / 2), 2);
+
+    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
+
+    return EARTH_RADIUS_NM * c;
+}
+
 std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
                                         uint8_t z,
                                         const std::optional<uint8_t>& overscaledZ) {
@@ -164,6 +213,7 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         uint32_t x, y;
         int16_t wrap;
         bool fullyVisible;
+        AABB latLonBB;
     };
 
     struct ResultTile {
@@ -194,11 +244,12 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
 
     const auto newRootTile = [&](int16_t wrap) -> Node {
         return {AABB({{wrap * numTiles, 0.0, 0.0}}, {{(wrap + 1) * numTiles, numTiles, 0.0}}),
-                uint8_t(0),
-                uint16_t(0),
-                uint16_t(0),
-                wrap,
-                false};
+            uint8_t(0),
+            uint16_t(0),
+            uint16_t(0),
+            wrap,
+            false,
+            AABB({{0.0, 0.0, 0.0}}, {{0.0, 0.0, 0.0}})};
     };
 
     // Perform depth-first traversal on tile tree to find visible tiles
@@ -214,9 +265,20 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
 
     stack.push_back(newRootTile(0));
 
+//    std::cout << "\nTesting Tiles\n";
+//    std::cout << "  Center Coord: " << centerCoord[0] << ", " << centerCoord[1] << ", " << centerCoord[2] << "\n";
+    
+    auto worldCoord = state.transformState.screenCoordinateToLatLng({transform.getSize().width / 2.0, transform.getSize().height / 2.0});
+    vec3 worldCoordVec3 = {worldCoord.longitude(), worldCoord.latitude(), 0.0};
+//    std::cout << "  World Coord: " << worldCoord.latitude() << ", " << worldCoord.longitude() << "\n";
+    
+    int tilesTested = 0;
+    
     while (!stack.empty()) {
         Node node = stack.back();
         stack.pop_back();
+        
+        tilesTested++;
 
         // Use cached visibility information of ancestor nodes
         if (!node.fullyVisible) {
@@ -231,6 +293,39 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
         const double* longestDim = std::max_element(distanceXyz.data(), distanceXyz.data() + distanceXyz.size());
         assert(longestDim);
 
+        if (state.maxTileDistanceNM > 0) {
+            // Tile bounds
+            // Distance is in tile coordinates
+            //        std::cout << "Tile: " << node.x << ", " << node.y << ", " << (int)node.zoom << "\n";
+            //        std::cout << " -> Distance XYZ: " << distanceXyz[0] << ", " << distanceXyz[1] << ", " << distanceXyz[2] << "\n";
+            auto bounds = tileBounds(node.x, node.y, node.zoom);
+            //Bounds:        lat_min, lon_min, lat_max, lon_max
+            auto minLat = std::get<0>(bounds);
+            auto minLon = std::get<1>(bounds);
+            auto maxLat = std::get<2>(bounds);
+            auto maxLon = std::get<3>(bounds);
+            auto worldLat = worldCoord.latitude();
+            auto worldLon = worldCoord.longitude();
+            bool pointInTile = false;
+            if ((worldLat >= minLat) &&
+                (worldLat <= maxLat) &&
+                (worldLon >= minLon) &&
+                (worldLon <= maxLon)) {
+                pointInTile = true;
+            }
+            
+            if (!pointInTile) {
+                auto distanceNM1 = haversine_nm(worldLat, worldLon, minLat, minLon);
+                auto distanceNM2 = haversine_nm(worldLat, worldLon, maxLat, minLon);
+                auto distanceNM3 = haversine_nm(worldLat, worldLon, maxLat, maxLon);
+                auto distanceNM4 = haversine_nm(worldLat, worldLon, minLat, maxLon);
+                auto minDistance = std::min(distanceNM1, std::min(distanceNM2, std::min(distanceNM3, distanceNM3)));
+                if (minDistance > state.maxTileDistanceNM) {
+                    continue;
+                }
+            }
+        }
+        
         // We're using distance based heuristics to determine if a tile should
         // be split into quadrants or not. radiusOfMaxLvlLodInTiles defines that
         // there's always a certain number of maxLevel tiles next to the map
@@ -271,6 +366,9 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
             child.y = childY;
         }
     }
+    
+    int resultTileCount = (int)result.size();
+    std::cout << "Tiles Tested: " << tilesTested << "; Result Tile Count: " << resultTileCount << "\n";
 
     // Sort results by distance
     std::sort(

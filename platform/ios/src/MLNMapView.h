@@ -510,6 +510,8 @@ MLN_EXPORT
 
 @property (nonatomic, assign) UIEdgeInsets frustumOffset;
 
+@property (nonatomic, assign) double maxTileDistanceNM;
+
 // MARK: Displaying the User’s Location
 
 /**

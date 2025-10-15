@@ -3312,6 +3312,13 @@ static void *windowScreenContext = &windowScreenContext;
     return _mbglMap->getTileLodZoomShift();
 }
 
+-(void)setMaxTileDistanceNM:(double)maxTileDistanceNM {
+    _mbglMap->setMaxTileDistanceNM(maxTileDistanceNM);
+}
+-(double)maxTileDistanceNM {
+    return _mbglMap->getMaxTileDistanceNM();
+}
+
 -(void)setFrustumOffset:(UIEdgeInsets)frustomOffset
 {
     _mbglMap->setFrustumOffset(MLNEdgeInsetsFromNSEdgeInsets(frustomOffset));

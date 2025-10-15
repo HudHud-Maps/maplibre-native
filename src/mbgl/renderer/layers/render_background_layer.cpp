@@ -119,9 +119,10 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
     assert(updateParameters);
     const auto zoom = state.getIntegerZoom();
     const auto tileCover = util::tileCover({state,
-                                            updateParameters->tileLodMinRadius,
-                                            updateParameters->tileLodScale,
-                                            updateParameters->tileLodPitchThreshold},
+        updateParameters->tileLodMinRadius,
+        updateParameters->tileLodScale,
+        updateParameters->tileLodPitchThreshold,
+        updateParameters->maxTileDistanceNM},
                                            zoom);
 
     // renderTiles is always empty, we use tileCover instead
