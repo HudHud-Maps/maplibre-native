@@ -117,7 +117,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     if (layerGroupIteration > 5) {
         if (layerGroupIteration % 50 != 0) {
-            return;
+          //  return;
         }
     }
     std::cout << "  -> SymbolLayerTweaker::execute: " << layerGroupName << "; Iteration: " << layerGroupIteration << "\n";

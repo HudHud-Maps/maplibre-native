@@ -82,7 +82,7 @@ public:
 
     void prepare() override {
         MLN_TRACE_FUNC();
-
+        //check this
         for (auto it = layersNeedPlacement.rbegin(); it != layersNeedPlacement.rend(); ++it) {
             placement->updateLayerBuckets(*it, parameters->transformParams.state, updateSymbolOpacities);
         }
