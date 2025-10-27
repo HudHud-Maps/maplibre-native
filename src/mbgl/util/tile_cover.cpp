@@ -369,6 +369,11 @@ std::vector<OverscaledTileID> tileCover(const TileCoverParameters& state,
     
     int resultTileCount = (int)result.size();
     std::cout << "Tiles Tested: " << tilesTested << "; Result Tile Count: " << resultTileCount << "\n";
+    if (resultTileCount < 10) {
+        for (auto t: result) {
+            std::cout << "  Tile: Zoom: " << (int)t.id.canonical.z << ", x: " << t.id.canonical.x << ", y: " << t.id.canonical.y << "\n";
+        }
+    }
 
     // Sort results by distance
     std::sort(
