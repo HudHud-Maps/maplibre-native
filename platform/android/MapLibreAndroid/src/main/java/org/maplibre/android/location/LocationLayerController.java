@@ -36,6 +36,10 @@ final class LocationLayerController {
 
   private static final String TAG = "Mbgl-LocationLayerController";
 
+  interface PuckPositionUpdateListener {
+    void onPuckPositionChanged(@NonNull LatLng latLng);
+  }
+
   @RenderMode.Mode
   private int renderMode;
 
@@ -44,6 +48,8 @@ final class LocationLayerController {
   private LocationComponentOptions options;
   private final OnRenderModeChangedListener internalRenderModeChangedListener;
   private final boolean useSpecializedLocationLayer;
+  @Nullable
+  private final PuckPositionUpdateListener puckPositionUpdateListener;
 
   private boolean isHidden = true;
   private boolean isStale;
@@ -58,12 +64,14 @@ final class LocationLayerController {
                           LayerBitmapProvider bitmapProvider,
                           @NonNull LocationComponentOptions options,
                           @NonNull OnRenderModeChangedListener internalRenderModeChangedListener,
-                          boolean useSpecializedLocationLayer) {
+                          boolean useSpecializedLocationLayer,
+                          @Nullable PuckPositionUpdateListener puckPositionUpdateListener) {
     this.maplibreMap = maplibreMap;
     this.bitmapProvider = bitmapProvider;
     this.internalRenderModeChangedListener = internalRenderModeChangedListener;
     this.useSpecializedLocationLayer = useSpecializedLocationLayer;
     this.isStale = options.enableStaleState();
+    this.puckPositionUpdateListener = puckPositionUpdateListener;
     if (useSpecializedLocationLayer) {
       locationLayerRenderer = layerSourceProvider.getIndicatorLocationLayerRenderer();
     } else {
@@ -262,6 +270,9 @@ final class LocationLayerController {
     new MapLibreAnimator.AnimationsValueChangeListener<LatLng>() {
       @Override
       public void onNewAnimationValue(LatLng value) {
+        if (puckPositionUpdateListener != null) {
+          puckPositionUpdateListener.onPuckPositionChanged(value);
+        }
         locationLayerRenderer.setLatLng(value);
       }
   };

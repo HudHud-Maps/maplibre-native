@@ -23,16 +23,16 @@ import org.maplibre.android.location.engine.LocationEngineCallback;
 import org.maplibre.android.location.engine.LocationEngineDefault;
 import org.maplibre.android.location.engine.LocationEngineRequest;
 import org.maplibre.android.location.engine.LocationEngineResult;
+import org.maplibre.android.location.engine.MapLibreFusedLocationEngineImpl;
 import org.maplibre.android.location.modes.CameraMode;
 import org.maplibre.android.location.modes.RenderMode;
-import org.maplibre.android.location.engine.MapLibreFusedLocationEngineImpl;
 import org.maplibre.android.location.permissions.PermissionsManager;
 import org.maplibre.android.log.Logger;
-import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener;
 import org.maplibre.android.maps.MapLibreMap.OnCameraMoveListener;
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener;
+import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.maps.Transform;
 import org.maplibre.android.style.layers.SymbolLayer;
@@ -52,7 +52,6 @@ import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_T
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_ZOOM_ANIM_DURATION;
 import static org.maplibre.android.location.LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS;
 import static org.maplibre.android.location.modes.RenderMode.GPS;
-
 
 /**
  * The Location Component provides location awareness to your mobile application. Enabling this
@@ -177,6 +176,8 @@ public final class LocationComponent {
   private final CopyOnWriteArrayList<OnLocationClickListener> onLocationClickListeners
     = new CopyOnWriteArrayList<>();
   private final CopyOnWriteArrayList<OnLocationLongClickListener> onLocationLongClickListeners
+    = new CopyOnWriteArrayList<>();
+  private final CopyOnWriteArrayList<OnPuckPositionChangeListener> onPuckPositionChangeListeners
     = new CopyOnWriteArrayList<>();
   private final CopyOnWriteArrayList<OnCameraTrackingChangedListener> onCameraTrackingChangedListeners
     = new CopyOnWriteArrayList<>();
@@ -991,6 +992,24 @@ public final class LocationComponent {
   }
 
   /**
+   * Adds a listener that receives updates whenever the rendered puck position changes.
+   *
+   * @param listener listener that will be invoked on puck position changes
+   */
+  public void addOnPuckPositionChangeListener(@NonNull OnPuckPositionChangeListener listener) {
+    onPuckPositionChangeListeners.add(listener);
+  }
+
+  /**
+   * Removes a listener that was receiving puck position updates.
+   *
+   * @param listener listener to remove
+   */
+  public void removeOnPuckPositionChangeListener(@NonNull OnPuckPositionChangeListener listener) {
+    onPuckPositionChangeListeners.remove(listener);
+  }
+
+  /**
    * Adds a listener that gets invoked when camera tracking state changes.
    *
    * @param listener Listener that gets invoked when camera tracking state changes.
@@ -1174,7 +1193,13 @@ public final class LocationComponent {
     LayerFeatureProvider featureProvider = new LayerFeatureProvider();
     LayerBitmapProvider bitmapProvider = new LayerBitmapProvider(context);
     locationLayerController = new LocationLayerController(maplibreMap, style, sourceProvider, featureProvider,
-      bitmapProvider, options, renderModeChangedListener, useSpecializedLocationLayer);
+      bitmapProvider, options, renderModeChangedListener, useSpecializedLocationLayer,
+      new LocationLayerController.PuckPositionUpdateListener() {
+        @Override
+        public void onPuckPositionChanged(@NonNull LatLng latLng) {
+          notifyPuckPositionChange(latLng);
+        }
+      });
     locationCameraController = new LocationCameraController(
       context, maplibreMap, transform, cameraTrackingChangedListener, options, onCameraMoveInvalidateListener);
 
@@ -1296,6 +1321,12 @@ public final class LocationComponent {
     }
     updateAccuracyRadius(location, false);
     lastLocation = location;
+  }
+
+  private void notifyPuckPositionChange(@NonNull LatLng puckPosition) {
+    for (OnPuckPositionChangeListener listener : onPuckPositionChangeListeners) {
+      listener.onPuckPositionChanged(puckPosition);
+    }
   }
 
   private Location[] getTargetLocationWithIntermediates(Location location, List<Location> intermediatePoints) {
