@@ -5,6 +5,7 @@
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/plugin/plugin_layer_properties.hpp>
 
+#include <map>
 #include <optional>
 
 namespace mbgl {
@@ -27,13 +28,14 @@ public:
     void prepare(const LayerPrepareParameters&) override;
 
     void upload(gfx::UploadPass&) override;
-    void render(PaintParameters&) override;
 
     void setRenderFunction(style::PluginLayer::OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
     void setUpdateFunction(style::PluginLayer::OnUpdateLayer updateFunction) { _updateFunction = updateFunction; }
     void setUpdatePropertiesFunction(style::PluginLayer::OnUpdateLayerProperties updateLayerPropertiesFunction) {
         _updateLayerPropertiesFunction = updateLayerPropertiesFunction;
     }
+
+    void callRenderFunction(PaintParameters& paintParameters);
 
 private:
     void transition(const TransitionParameters&) override;
@@ -67,6 +69,8 @@ private:
     style::PluginLayer::OnUpdateLayer _updateFunction = nullptr;
 
     style::PluginLayer::OnUpdateLayerProperties _updateLayerPropertiesFunction = nullptr;
+
+    std::map<OverscaledTileID, std::shared_ptr<mbgl::plugin::FeatureCollection>> _featureCollectionByTile;
 };
 
 } // namespace mbgl

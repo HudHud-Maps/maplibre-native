@@ -13,6 +13,8 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.maplibre.android.plugin.PluginFileSource;
+import org.maplibre.android.plugin.PluginProtocolHandler;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
 import org.maplibre.android.LibraryLoader;
@@ -1165,6 +1167,12 @@ final class NativeMapView implements NativeMap {
     nativeSetFrustumOffset(offset);
   }
 
+  public void addPluginProtocolHandler(PluginProtocolHandler protocolHandler) {
+    PluginFileSource pluginFileSource = new PluginFileSource();
+    pluginFileSource.protocolHandler = protocolHandler;
+    nativeAddPluginFileSource(pluginFileSource);
+  }
+
   @Override
   public void setSwapBehaviorFlush(boolean flush) {
     mapRenderer.setSwapBehaviorFlush(flush);
@@ -1767,6 +1775,10 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeSetFrustumOffset(RectF offsset);
+
+  @Keep
+  private native void nativeAddPluginFileSource(PluginFileSource fileSource);
+
 
   //
   // Snapshot
