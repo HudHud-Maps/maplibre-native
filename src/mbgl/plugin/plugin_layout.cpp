@@ -131,7 +131,7 @@ void PluginLayout::prepareSymbols(const GlyphMap& glyphMap,
         if (!formattedTexts.empty()) {
             for (const auto& formattedText : formattedTexts) {
                 const auto& it = glyphToTex.find(formattedText.second);
-                if (it != glyphToTex.end()) {
+                if (glyphToTex.contains(formattedText.second)) {
                     continue;
                 }
 
@@ -169,10 +169,10 @@ void PluginLayout::prepareSymbols(const GlyphMap& glyphMap,
             }
         }
 
-        if (feature.icon) {
-            auto image = imageMap.find(feature.icon->id());
+        if (feature.icon && imagePositions.contains(feature.icon->id())) {
             PositionedIcon shapedIcon = PositionedIcon::shapeIcon(
                 imagePositions.at(feature.icon->id()), {0, 0}, style::SymbolAnchorType::Center);
+
             // TODO(yousifd): Deal with SDF Images
             spriteIdToTex[feature.icon->id()] = getIconQuads(shapedIcon, 0.f, SymbolContent::IconRGBA, false);
         }
