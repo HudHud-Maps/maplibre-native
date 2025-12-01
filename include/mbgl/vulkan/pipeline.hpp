@@ -7,6 +7,7 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 
 namespace mbgl {
 namespace vulkan {
@@ -47,6 +48,7 @@ public:
     // external values (used in hash)
     vk::RenderPass renderPass{};
     vk::Extent2D viewExtent{};
+    vk::Rect2D scissorRect{};
 
     // dynamic values (not part of the pipeline/ignored in hash)
     struct {

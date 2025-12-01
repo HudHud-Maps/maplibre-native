@@ -298,9 +298,6 @@ const double MLNMinimumZoomLevelForUserTracking = 10.5;
 /// Initial zoom level when entering user tracking mode from a low zoom level.
 const double MLNDefaultZoomLevelForUserTracking = 14.0;
 
-/// Tolerance for snapping to true north, measured in degrees in either direction.
-const CLLocationDirection MLNToleranceForSnappingToNorth = 7;
-
 /// Distance threshold to stop the camera while animating.
 const CLLocationDistance MLNDistanceThresholdForCameraPause = 500;
 
@@ -644,7 +641,7 @@ public:
 {
     // Remove all the plugin layers
     [self.pluginLayers removeAllObjects];
-    
+
     if ( ! styleURL)
     {
         styleURL = [MLNStyle defaultStyleURL];
@@ -906,6 +903,7 @@ public:
     [self addGestureRecognizer:_rotate];
     _rotateEnabled = YES;
     _rotationThresholdWhileZooming = 3;
+    _toleranceForSnappingToNorth = 7;
 
     _doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTapGesture:)];
     _doubleTap.numberOfTapsRequired = 2;
@@ -3354,9 +3352,9 @@ static void *windowScreenContext = &windowScreenContext;
     return _mbglMap->getTileLodZoomShift();
 }
 
--(void)setFrustumOffset:(UIEdgeInsets)frustomOffset
+-(void)setFrustumOffset:(UIEdgeInsets)frustumOffset
 {
-    _mbglMap->setFrustumOffset(MLNEdgeInsetsFromNSEdgeInsets(frustomOffset));
+    _mbglMap->setFrustumOffset(MLNEdgeInsetsFromNSEdgeInsets(frustumOffset));
 }
 
 -(UIEdgeInsets)frustumOffset
@@ -3587,7 +3585,12 @@ static void *windowScreenContext = &windowScreenContext;
 - (id)accessibilityElementForAnnotationWithTag:(MLNAnnotationTag)annotationTag
 {
     MLNAssert(_annotationContextsByAnnotationTag.count(annotationTag), @"Missing annotation for tag %llu.", annotationTag);
-    MLNAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(annotationTag);
+    auto annotationContextIt = _annotationContextsByAnnotationTag.find(annotationTag);
+    if (annotationContextIt == _annotationContextsByAnnotationTag.end()) {
+        return nil;
+    }
+
+    MLNAnnotationContext &annotationContext = annotationContextIt->second;
     id <MLNAnnotation> annotation = annotationContext.annotation;
 
     // Let the annotation view serve as its own accessibility element.
@@ -6882,8 +6885,8 @@ static void *windowScreenContext = &windowScreenContext;
         [self unrotateIfNeededAnimated:YES];
 
         // Snap to north.
-        if ((self.direction < MLNToleranceForSnappingToNorth
-             || self.direction > 360 - MLNToleranceForSnappingToNorth)
+        if ((self.direction < self.toleranceForSnappingToNorth
+             || self.direction > 360 - self.toleranceForSnappingToNorth)
             && self.userTrackingMode != MLNUserTrackingModeFollowWithHeading
             && self.userTrackingMode != MLNUserTrackingModeFollowWithCourse)
         {

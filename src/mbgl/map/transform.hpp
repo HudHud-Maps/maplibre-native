@@ -140,7 +140,11 @@ public:
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);
 
-protected:
+    // Frustum
+    void setFrustumOffset(const EdgeInsets&);
+    EdgeInsets getFrustumOffset();
+
+private:
     TransformObserver& observer;
     TransformState state;
 

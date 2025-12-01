@@ -9,6 +9,7 @@
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #include <array>

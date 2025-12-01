@@ -75,6 +75,8 @@ public:
     // Add style parsing filter
     void addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter>);
 
+    void cancelPendingRequests();
+
     // Private implementation
     class Impl;
     const std::unique_ptr<Impl> impl;

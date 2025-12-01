@@ -89,6 +89,9 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
     if (properties.viewPortMode) {
         setViewportMode(*properties.viewPortMode);
     }
+    if (properties.frustumOffset) {
+        setFrustumOffset(*properties.frustumOffset);
+    }
 }
 
 // MARK: - Matrix
