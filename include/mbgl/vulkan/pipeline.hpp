@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
@@ -42,8 +41,6 @@ public:
     vk::StencilOp stencilDepthFail = vk::StencilOp::eKeep;
 
     bool wideLines = false;
-
-    vk::Rect2D scissorRect;
 
     // external values (used in hash)
     vk::RenderPass renderPass{};
