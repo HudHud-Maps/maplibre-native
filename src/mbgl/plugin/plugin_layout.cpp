@@ -9,7 +9,6 @@
 #include <mbgl/text/shaping.hpp>
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/plugin/feature_collection_bucket.hpp>
-#include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/plugin/plugin_layer_properties.hpp>
 
 namespace mbgl {
@@ -85,10 +84,12 @@ PluginLayout::PluginLayout(const BucketParameters& parameters_,
             const auto& it = ft.getProperties().find(property.name);
             if (it != ft.getProperties().end()) {
                 TaggedString formattedText;
-                std::string u8string(it->second.getString()->c_str());
+                std::string u8string(*it->second.getString());
                 try {
-                    formattedText.addTextSection(
-                        applyArabicShaping(util::convertUTF8ToUTF16(u8string)), 1.0, baseFontStack);
+                    formattedText.addTextSection(applyArabicShaping(util::convertUTF8ToUTF16(u8string)),
+                                                 1.0,
+                                                 baseFontStack,
+                                                 GlyphIDType::FontPBF);
                 } catch (...) {
                     mbgl::Log::Error(
                         mbgl::Event::ParseTile,
@@ -102,7 +103,7 @@ PluginLayout::PluginLayout(const BucketParameters& parameters_,
 
                 // Loop through all characters of this text and collect unique codepoints.
                 for (std::size_t j = 0; j < formattedText.length(); j++) {
-                    GlyphIDs& dependencies = layoutParameters.glyphDependencies[baseFontStack];
+                    GlyphIDs& dependencies = layoutParameters.glyphDependencies.glyphs[baseFontStack];
                     char16_t codePoint = formattedText.getCharCodeAt(j);
                     dependencies.insert(codePoint);
                 }
@@ -130,7 +131,6 @@ void PluginLayout::prepareSymbols(const GlyphMap& glyphMap,
 
         if (!formattedTexts.empty()) {
             for (const auto& formattedText : formattedTexts) {
-                const auto& it = glyphToTex.find(formattedText.second);
                 if (glyphToTex.contains(formattedText.second)) {
                     continue;
                 }
@@ -179,11 +179,11 @@ void PluginLayout::prepareSymbols(const GlyphMap& glyphMap,
     }
 }
 
-void PluginLayout::createBucket(const ImagePositions& imagePositions,
+void PluginLayout::createBucket(const ImagePositions&,
                                 std::unique_ptr<FeatureIndex>&,
                                 mbgl::unordered_map<std::string, LayerRenderData>& renderData,
-                                const bool firstLoad,
-                                const bool showCollisionBoxes,
+                                const bool,
+                                const bool,
                                 const CanonicalTileID& canonical) {
     auto bucket = std::make_shared<FeatureCollectionBucket>(parameters, layers);
     bucket->_spriteIdToTex = spriteIdToTex;

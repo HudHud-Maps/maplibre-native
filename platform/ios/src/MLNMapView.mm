@@ -8013,7 +8013,7 @@ static void *windowScreenContext = &windowScreenContext;
                     if (propertyObject.type == MLNPluginLayerFeatureSymbolPropertyTypeProperty) {
                         type = mbgl::plugin::FeatureSymbolProperty::Type::PROPERTY;
                     }
-                    mbgl::plugin::FeatureSymbolProperty property([propertyObject.name UTF8String], type);
+                    mbgl::plugin::FeatureSymbolProperty property{[propertyObject.name UTF8String], type};
                     properties.push_back(property);
                 }
                 return properties;
@@ -8029,7 +8029,7 @@ static void *windowScreenContext = &windowScreenContext;
                 if (propertyObject.type == MLNPluginLayerFeatureSymbolPropertyTypeProperty) {
                     type = mbgl::plugin::FeatureSymbolProperty::Type::PROPERTY;
                 }
-                mbgl::plugin::FeatureSymbolProperty property([propertyObject.name UTF8String], type);
+                mbgl::plugin::FeatureSymbolProperty property{[propertyObject.name UTF8String], type};
                 properties.push_back(property);
             }
             return properties;
