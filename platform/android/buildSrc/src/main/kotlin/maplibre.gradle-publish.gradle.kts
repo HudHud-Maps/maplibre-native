@@ -1,3 +1,4 @@
+import org.gradle.api.Task
 import org.gradle.kotlin.dsl.get
 import java.util.Locale
 
@@ -5,8 +6,29 @@ plugins {
     `maven-publish`
     signing
     id("com.android.library")
+    id("com.vanniktech.maven.publish.base")
     id("maplibre.artifact-settings")
-    id("maplibre.publish-root")
+}
+
+
+afterEvaluate {
+    mavenPublishing {
+        publishToMavenCentral(true)
+        signAllPublications()
+    }
+}
+
+// Configure task dependencies after all tasks are created
+gradle.projectsEvaluated {
+    // Explicitly configure publish tasks to depend on their corresponding signing tasks
+    // This fixes Gradle's implicit dependency validation warnings
+    // Since some publications may share components (e.g., defaultdebug and opengldebug both use openglDebug),
+    // we ensure all signing tasks complete before any publish task
+    tasks.filter { it.name.startsWith("publish") && it.name.endsWith("PublicationToMavenCentralRepository") }.forEach { publishTask ->
+        tasks.filter { it.name.startsWith("sign") && it.name.endsWith("Publication") }.forEach { signingTask ->
+            publishTask.dependsOn(signingTask)
+        }
+    }
 }
 
 tasks.register<Javadoc>("androidJavadocs") {
@@ -115,7 +137,3 @@ afterEvaluate {
         }
     }
 }
-
-// signing {
-//     sign(publishing.publications)
-// }

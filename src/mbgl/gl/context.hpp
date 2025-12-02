@@ -2,10 +2,10 @@
 
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
-#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/gl/object.hpp>
 #include <mbgl/gl/state.hpp>
 #include <mbgl/gl/value.hpp>

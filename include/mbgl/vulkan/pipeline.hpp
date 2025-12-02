@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/gfx/scissor_rect.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
+#include <mbgl/gfx/scissor_rect.hpp>
 
 namespace mbgl {
 namespace vulkan {
@@ -42,11 +42,10 @@ public:
 
     bool wideLines = false;
 
-    vk::Rect2D scissorRect;
-
     // external values (used in hash)
     vk::RenderPass renderPass{};
     vk::Extent2D viewExtent{};
+    vk::Rect2D scissorRect{};
 
     // dynamic values (not part of the pipeline/ignored in hash)
     struct {
