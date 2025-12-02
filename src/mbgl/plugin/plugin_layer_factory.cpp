@@ -3,9 +3,12 @@
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/plugin/plugin_layer_render.hpp>
 #include <mbgl/plugin/feature_collection_bucket.hpp>
+#include <mbgl/plugin/plugin_layout.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/renderer/bucket.hpp>
 
+#include <iostream>
+#include <memory>
 #include <string>
 
 namespace mbgl {
@@ -180,6 +183,16 @@ std::unique_ptr<Bucket> PluginLayerFactory::createBucket(
     [[maybe_unused]] const std::vector<Immutable<style::LayerProperties>>& layers) noexcept {
     if (supportsFeatureCollectionBuckets) {
         return std::make_unique<FeatureCollectionBucket>(parameters, layers);
+    }
+    return nullptr;
+}
+
+std::unique_ptr<Layout> PluginLayerFactory::createLayout(
+    const LayoutParameters& parameters,
+    std::unique_ptr<GeometryTileLayer> tileLayer,
+    const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
+    if (supportsSymbolBuckets) {
+        return std::make_unique<PluginLayout>(parameters.bucketParameters, group, std::move(tileLayer), parameters);
     }
     return nullptr;
 }

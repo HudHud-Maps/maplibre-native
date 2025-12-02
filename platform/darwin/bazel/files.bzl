@@ -174,6 +174,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
     "src/NSExpression+MLNPrivateAdditions.h",
     "src/NSPredicate+MLNPrivateAdditions.h",
     "src/MLNPluginStyleLayer_Private.h",
+    "src/MLNPluginLayer_Private.h",
     "src/MLNStyleFilter_Private.h",
 ]
 

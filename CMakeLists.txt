@@ -982,6 +982,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/feature_collection.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/feature_collection_bucket.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/feature_collection_bucket.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layout.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/plugin/plugin_layout.cpp
 )
 
 

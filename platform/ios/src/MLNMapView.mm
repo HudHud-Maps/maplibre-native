@@ -36,6 +36,8 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
+#include <mbgl/util/rect.hpp>
+#include <mbgl/mtl/texture2d.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
 
 #import "Mapbox.h"
@@ -87,6 +89,7 @@
 #import "MLNPluginProtocolHandler.h"
 #import "MLNStyleLayerManager.h"
 #include "MLNPluginStyleLayer_Private.h"
+#include "MLNPluginLayer_Private.h"
 #import "MLNLocationIndicatorUserLocationAnnotationView.h"
 #include "MLNStyleFilter.h"
 #include "MLNStyleFilter_Private.h"
@@ -7762,11 +7765,11 @@ static void *windowScreenContext = &windowScreenContext;
 
     NSMutableArray *featureCoordinates = [NSMutableArray array];
     for (auto & coordinateCollection: feature->_featureCoordinates) {
-
         for (auto & coordinate: coordinateCollection._coordinates) {
-            CLLocationCoordinate2D c = CLLocationCoordinate2DMake(coordinate._lat, coordinate._lon);
-            NSValue *value = [NSValue valueWithBytes:&c objCType:@encode(CLLocationCoordinate2D)];
-            [featureCoordinates addObject:value];
+            MLNPluginLayerFeatureCoordinate *featureCoordinate = [[MLNPluginLayerFeatureCoordinate alloc] init];
+            featureCoordinate.coordinate = CLLocationCoordinate2DMake(coordinate._lat, coordinate._lon);
+            featureCoordinate.tile = CGPointMake(coordinate._tileX, coordinate._tileY);
+            [featureCoordinates addObject:featureCoordinate];
         }
 
     }
@@ -7816,6 +7819,10 @@ static void *windowScreenContext = &windowScreenContext;
         source = mbgl::style::LayerTypeInfo::Source::Required;
     }
 
+    if (capabilities.supportsReadingSymbols) {
+        layout = mbgl::style::LayerTypeInfo::Layout::Required;
+    }
+
     auto factory = std::make_unique<mbgl::PluginLayerPeerFactory>(layerType,
                                                source,
                                                pass3D,
@@ -7828,6 +7835,7 @@ static void *windowScreenContext = &windowScreenContext;
 
     Class layerClass = pluginLayerClass;
     factory->supportsFeatureCollectionBuckets = capabilities.supportsReadingTileFeatures;
+    factory->supportsSymbolBuckets = capabilities.supportsReadingSymbols;
     factory->setOnLayerCreatedEvent([layerClass, weakMapView, pluginLayerClass](mbgl::style::PluginLayer *pluginLayer) {
 
         //NSLog(@"Creating Plugin Layer: %@", layerClass);
@@ -7872,9 +7880,13 @@ static void *windowScreenContext = &windowScreenContext;
 
         // Set the render function
         auto renderFunction = [weakPlugInLayer, weakMapView](mbgl::PaintParameters& paintParameters){
-
-            const mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
+            mbgl::mtl::RenderPass& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
             id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)renderPass.getMetalEncoder().get();
+
+            weakPlugInLayer.textureBindingCallback = ^(std::shared_ptr<mbgl::gfx::Texture2D> texture2D, int32_t location) {
+                auto tex = static_pointer_cast<mbgl::mtl::Texture2D>(texture2D);
+                tex->bind(renderPass, location);
+            };
 
             MLNMapView *strongMapView = weakMapView;
 
@@ -7938,9 +7950,35 @@ static void *windowScreenContext = &windowScreenContext;
                     collection.features = [NSArray arrayWithArray:featureList];
                     collection.tileID = [weakMapView tileIDToString:featureCollection->_featureCollectionTileID];
 
+                    NSMutableDictionary *tileSprites = [NSMutableDictionary dictionary];
+                    for (const auto& s : featureCollection->_sprites) {
+                        NSString *key = [NSString stringWithUTF8String:s.first.c_str()];
+                        NSMutableArray *quads = [NSMutableArray arrayWithCapacity:s.second.size()];
+                        for (const auto& q : s.second) {
+                            MLNQuad *quad = [MLNQuad quadWithSymbolQuad:q];
+                            [quads addObject:quad];
+                        }
+                        [tileSprites setObject:[NSArray arrayWithArray:quads] forKey:key];
+                    }
+                    collection.sprites = [[MLNPluginAtlas alloc] init];
+                    collection.sprites.mapping = [NSDictionary dictionaryWithDictionary:tileSprites];
+                    collection.sprites.texture = [MLNTexture textureWithTexture:featureCollection->_spriteAtlas];
+
+                    NSMutableDictionary *tileGlyphs = [NSMutableDictionary dictionary];
+                    for (const auto& g : featureCollection->_glyphs) {
+                        NSString *key = [NSString stringWithUTF8String:g.first.c_str()];
+                        NSMutableArray *quads = [NSMutableArray arrayWithCapacity:g.second.size()];
+                        for (const auto& q : g.second) {
+                            MLNQuad *quad = [MLNQuad quadWithSymbolQuad:q];
+                            [quads addObject:quad];
+                        }
+                        [tileGlyphs setObject:[NSArray arrayWithArray:quads] forKey:key];
+                    }
+                    collection.glyphs = [[MLNPluginAtlas alloc] init];
+                    collection.glyphs.mapping = [NSDictionary dictionaryWithDictionary:tileGlyphs];
+                    collection.glyphs.texture = [MLNTexture textureWithTexture:featureCollection->_glyphAtlas];
 
                     [weakPlugInLayer onFeatureCollectionLoaded:collection];
-
                 }
 
             });
@@ -7962,16 +8000,50 @@ static void *windowScreenContext = &windowScreenContext;
                     collection.tileID = [weakMapView tileIDToString:featureCollection->_featureCollectionTileID];
 
                     [weakPlugInLayer onFeatureCollectionUnloaded:collection];
-
                 }
-
             });
-
-
-
-
-
         }
+
+        pluginLayerImpl->setSpritePropertiesFunction([weakPlugInLayer]() -> std::vector<mbgl::plugin::FeatureSymbolProperty> {
+            @autoreleasepool {
+                NSArray* spriteProperties = [weakPlugInLayer onSpriteProperties];
+                std::vector<mbgl::plugin::FeatureSymbolProperty> properties;
+                for (MLNPluginLayerFeatureSymbolProperty* propertyObject in spriteProperties) {
+                    mbgl::plugin::FeatureSymbolProperty::Type type = mbgl::plugin::FeatureSymbolProperty::Type::LITERAL;
+                    if (propertyObject.type == MLNPluginLayerFeatureSymbolPropertyTypeProperty) {
+                        type = mbgl::plugin::FeatureSymbolProperty::Type::PROPERTY;
+                    }
+                    mbgl::plugin::FeatureSymbolProperty property{[propertyObject.name UTF8String], type};
+                    properties.push_back(property);
+                }
+                return properties;
+            }
+        });
+
+        pluginLayerImpl->setGlphyPropertiesFunction([weakPlugInLayer]() -> std::vector<mbgl::plugin::FeatureSymbolProperty> {
+            // TODO(yousifd): Add more properties to the FeatureGlyphProperty to modify how the text is shaped
+            NSArray* glyphProperties = [weakPlugInLayer onGlyphProperties];
+            std::vector<mbgl::plugin::FeatureSymbolProperty> properties;
+            for (MLNPluginLayerFeatureSymbolProperty* propertyObject in glyphProperties) {
+                mbgl::plugin::FeatureSymbolProperty::Type type = mbgl::plugin::FeatureSymbolProperty::Type::LITERAL;
+                if (propertyObject.type == MLNPluginLayerFeatureSymbolPropertyTypeProperty) {
+                    type = mbgl::plugin::FeatureSymbolProperty::Type::PROPERTY;
+                }
+                mbgl::plugin::FeatureSymbolProperty property{[propertyObject.name UTF8String], type};
+                properties.push_back(property);
+            }
+            return properties;
+        });
+
+        pluginLayerImpl->setBaseFontStackFunction([weakPlugInLayer]() -> std::vector<std::string> {
+            NSArray* baseFontStack = [weakPlugInLayer onBaseFontStack];
+            std::vector<std::string> fonts;
+            for (NSString *font in baseFontStack) {
+                fonts.push_back([font UTF8String]);
+            }
+
+            return fonts;
+        });
 
     });
 

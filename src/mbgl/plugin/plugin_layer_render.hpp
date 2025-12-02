@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/offscreen_texture.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
 #include <mbgl/plugin/plugin_layer_properties.hpp>
@@ -15,7 +16,7 @@ public:
     explicit RenderPluginLayer(Immutable<style::PluginLayer::Impl>);
     ~RenderPluginLayer() override;
 
-    void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
+    // void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) override;
 
     /// Generate any changes needed by the layer
     void update(gfx::ShaderRegistry&,

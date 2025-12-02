@@ -26,6 +26,9 @@ public:
     // Set to false, but if the caller wants to support on features loaded, then set this to true
     bool supportsFeatureCollectionBuckets = false;
 
+    // Set to false, but if the caller wants to support loading symbols, then set this to true
+    bool supportsSymbolBuckets = false;
+
     using OnLayerCreatedEvent = std::function<void(mbgl::style::PluginLayer* pluginLayer)>;
     void setOnLayerCreatedEvent(OnLayerCreatedEvent onLayerCreated) { _onLayerCreated = onLayerCreated; }
 
@@ -36,6 +39,10 @@ protected:
     std::unique_ptr<Bucket> createBucket(const BucketParameters&,
                                          const std::vector<Immutable<style::LayerProperties>>&) noexcept final;
     std::unique_ptr<RenderLayer> createRenderLayer(Immutable<style::Layer::Impl>) noexcept final;
+
+    std::unique_ptr<Layout> createLayout(const LayoutParameters&,
+                                         std::unique_ptr<GeometryTileLayer>,
+                                         const std::vector<Immutable<style::LayerProperties>>&) noexcept final;
 
 private:
     // These is the layer type info that is setup during factory creation and returned in the getTypeInfo method

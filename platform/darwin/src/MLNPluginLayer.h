@@ -42,6 +42,29 @@ MLN_EXPORT
 
 @end
 
+@interface MLNTexture : NSObject
+
+- (CGSize)getSize;
+
+- (id<MTLTexture>)getMetalTexture;
+
+@end
+
+MLN_EXPORT
+@interface MLNQuad : NSObject
+
+@property CGPoint tl;
+@property CGPoint tr;
+@property CGPoint bl;
+@property CGPoint br;
+@property CGRect texCoords;
+@property CGPoint offset;
+
+- (instancetype)initWithQuad:(MLNQuad *)quad;
++ (instancetype)quadWithQuad:(MLNQuad *)quad;
+
+@end
+
 @interface MLNPluginLayerTileFeature : NSObject
 
 // This is the unique feature ID in the tile source if applicable.  Can be empty
@@ -51,10 +74,45 @@ MLN_EXPORT
 
 @end
 
+@interface MLNPluginAtlas : NSObject
+
+@property NSDictionary *mapping;
+@property MLNTexture *texture;
+
+@end
+
+MLN_EXPORT
+@interface MLNPluginLayerFeatureCoordinate : NSObject
+
+@property CLLocationCoordinate2D coordinate;
+@property CGPoint tile;
+
+@end
+
 @interface MLNPluginLayerTileFeatureCollection : NSObject
 
 @property NSArray *features;
 @property NSString *tileID;  // z,x,y
+
+@property MLNPluginAtlas *sprites;
+@property MLNPluginAtlas *glyphs;
+
+@end
+
+typedef enum {
+  MLNPluginLayerFeatureSymbolPropertyTypeLiteral,
+  MLNPluginLayerFeatureSymbolPropertyTypeProperty,
+} MLNPluginLayerFeatureSymbolPropertyType;
+
+MLN_EXPORT
+@interface MLNPluginLayerFeatureSymbolProperty : NSObject
+
+@property NSString *name;
+@property MLNPluginLayerFeatureSymbolPropertyType type;
+
+- (instancetype)initWithName:(NSString *)name type:(MLNPluginLayerFeatureSymbolPropertyType)type;
++ (instancetype)propertyWithName:(NSString *)name
+                            type:(MLNPluginLayerFeatureSymbolPropertyType)type;
 
 @end
 
@@ -73,6 +131,9 @@ MLN_EXPORT
 
 //! Set this to true if this layer can support reading features from the tiles
 @property BOOL supportsReadingTileFeatures;
+
+//! Set this to true if this layer can support reading symbols (sprites and glyphs) from the style
+@property BOOL supportsReadingSymbols;
 
 //! This is a list of layer properties that this layer supports.
 @property (copy) NSArray<MLNPluginLayerProperty *> *layerProperties;
@@ -128,8 +189,16 @@ MLN_EXPORT
 /// Called when a set of features are unloaded because the tile goes out of scene/etc
 - (void)onFeatureCollectionUnloaded:(MLNPluginLayerTileFeatureCollection *)tileFeatureCollection;
 
+- (NSArray *)onSpriteProperties;
+
+- (NSArray *)onGlyphProperties;
+
+- (NSArray *)onBaseFontStack;
+
 /// Added to a map view
 - (void)didMoveToMapView:(MLNMapView *)mapView;
+
+- (void)bindTexture:(MLNTexture *)texture location:(int32_t)location;
 
 @end
 
