@@ -13,6 +13,8 @@
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/collection.hpp>
 
+#include <mbgl/text/glyph.hpp>
+
 #include <mbgl/map/camera.hpp>
 
 #include <mbgl/util/noncopyable.hpp>
@@ -66,6 +68,9 @@ public:
     Layer* addLayer(std::unique_ptr<Layer>, const std::optional<std::string>& beforeLayerID = std::nullopt);
     std::unique_ptr<Layer> removeLayer(const std::string& layerID);
 
+    // Add style parsing filter
+    void addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter>);
+
     std::string getName() const;
     CameraOptions getDefaultCamera() const;
 
@@ -80,6 +85,7 @@ public:
     void removeImage(const std::string&);
 
     const std::string& getGlyphURL() const;
+    std::shared_ptr<FontFaces> getFontFaces() const;
 
     using ImageImpls = std::vector<Immutable<Image::Impl>>;
     Immutable<ImageImpls> getImageImpls() const;
@@ -93,7 +99,10 @@ public:
     bool loaded = false;
 
 private:
+    void filterThenParse(const std::string& styleData);
     void parse(const std::string&);
+
+    std::vector<std::shared_ptr<PluginStyleFilter>> _styleFilters;
 
     std::shared_ptr<FileSource> fileSource;
 
@@ -104,6 +113,7 @@ private:
     std::unique_ptr<SpriteLoader> spriteLoader;
 
     std::string glyphURL;
+    std::shared_ptr<FontFaces> fontFaces;
     Immutable<ImageImpls> images = makeMutable<ImageImpls>();
     CollectionWithPersistentOrder<Source> sources;
     Collection<Layer> layers;

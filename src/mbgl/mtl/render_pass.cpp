@@ -30,6 +30,10 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
                 }
             }
             encoder = NS::RetainPtr(buffer->renderCommandEncoder(rpd.get()));
+
+            const auto& texture = rpd->colorAttachments()->object(0)->texture();
+            width = texture->width();
+            height = texture->height();
         }
     }
 
@@ -78,6 +82,7 @@ void RenderPass::resetState() {
 
     currentCullMode = MTL::CullModeNone;
     currentWinding = MTL::WindingClockwise;
+    currentScissorRect = {0, 0, 0, 0};
 }
 
 namespace {
@@ -194,7 +199,6 @@ void RenderPass::setFragmentSamplerState(const MTLSamplerStatePtr& state, int32_
     }
 }
 
-/// Set the render pipeline state
 void RenderPass::setRenderPipelineState(const MTLRenderPipelineStatePtr& pipelineState) {
     if (pipelineState != currentPipelineState) {
         currentPipelineState = pipelineState;
@@ -213,6 +217,20 @@ void RenderPass::setFrontFacingWinding(const MTL::Winding winding) {
     if (winding != currentWinding) {
         encoder->setFrontFacingWinding(winding);
         currentWinding = winding;
+    }
+}
+
+void RenderPass::setScissorRect(MTL::ScissorRect rect) {
+    if (rect.x != currentScissorRect.x || rect.y != currentScissorRect.y || rect.width != currentScissorRect.width ||
+        rect.height != currentScissorRect.height) {
+        if (rect.width + rect.x > width) {
+            rect.width = width - rect.x;
+        }
+        if (rect.height + rect.y > height) {
+            rect.height = height - rect.y;
+        }
+        encoder->setScissorRect(rect);
+        currentScissorRect = rect;
     }
 }
 

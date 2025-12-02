@@ -23,6 +23,7 @@
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/plugin/plugin_style_filter.hpp>
 #include <sstream>
 
 namespace mbgl {
@@ -44,7 +45,7 @@ void Style::Impl::loadJSON(const std::string& json_) {
     observer->onStyleLoading();
 
     url.clear();
-    parse(json_);
+    filterThenParse(json_);
 }
 
 void Style::Impl::loadURL(const std::string& url_) {
@@ -74,9 +75,23 @@ void Style::Impl::loadURL(const std::string& url_) {
         } else if (res.notModified || res.noContent) {
             return;
         } else {
-            parse(*res.data);
+            filterThenParse(*res.data);
         }
     });
+}
+
+void Style::Impl::filterThenParse(const std::string& styleData) {
+    if (_styleFilters.size() == 0) {
+        parse(styleData);
+        return;
+    }
+
+    // Otherwise, go through the chain of filters
+    std::string filteredStyle = styleData;
+    for (const auto& filter : _styleFilters) {
+        filteredStyle = filter->filterResponse(filteredStyle);
+    }
+    parse(filteredStyle);
 }
 
 void Style::Impl::parse(const std::string& json_) {
@@ -134,7 +149,7 @@ void Style::Impl::parse(const std::string& json_) {
                       std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
     }
     glyphURL = parser.glyphURL;
-
+    fontFaces = parser.fontFaces;
     loaded = true;
     observer->onStyleLoaded();
 }
@@ -231,6 +246,11 @@ std::unique_ptr<Layer> Style::Impl::removeLayer(const std::string& id) {
     }
 
     return layer;
+}
+
+// Add style parsing filter
+void Style::Impl::addStyleFilter(std::shared_ptr<mbgl::style::PluginStyleFilter> filter) {
+    _styleFilters.push_back(filter);
 }
 
 void Style::Impl::setLight(std::unique_ptr<Light> light_) {
@@ -425,6 +445,10 @@ void Style::Impl::dumpDebugLogs() const {
 
 const std::string& Style::Impl::getGlyphURL() const {
     return glyphURL;
+}
+
+std::shared_ptr<FontFaces> Style::Impl::getFontFaces() const {
+    return fontFaces;
 }
 
 Immutable<std::vector<Immutable<Image::Impl>>> Style::Impl::getImageImpls() const {

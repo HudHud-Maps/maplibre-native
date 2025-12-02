@@ -12,7 +12,6 @@
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 #endif
 #include <mbgl/gfx/drawable.hpp>
-#include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/style/properties.hpp>
 #include <mbgl/renderer/render_tile.hpp>
@@ -62,7 +61,7 @@ void RenderPluginLayerTweaker::execute([[maybe_unused]] mbgl::gfx::Drawable& dra
     style::CustomLayerRenderParameters parameters(paintParameters);
 #endif
 
-    _plugInRenderer->render2(paintParameters);
+    _plugInRenderer->callRenderFunction(paintParameters);
 
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.
@@ -96,7 +95,7 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
     bool removeAllTiles = ((renderTiles == nullptr) || (renderTiles->empty()));
 
     // Get list of tiles to remove and then remove them
-    for (auto currentCollection : _featureCollectionByTile) {
+    for (const auto& currentCollection : _featureCollectionByTile) {
         if (removeAllTiles || !hasRenderTile(currentCollection.first)) {
             removedTiles.push_back(currentCollection.first);
         }
@@ -188,7 +187,7 @@ void RenderPluginLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaderRegis
 
 void RenderPluginLayer::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {}
 
-void RenderPluginLayer::render2(PaintParameters& paintParameters) {
+void RenderPluginLayer::callRenderFunction(PaintParameters& paintParameters) {
     if (_renderFunction) {
         _renderFunction(paintParameters);
     }

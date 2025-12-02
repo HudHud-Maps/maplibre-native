@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNScaleBar;
 @class MLNShape;
 @class MLNPluginLayer;
+@class MLNStyleFilter;
 
 @protocol MLNMapViewDelegate;
 @protocol MLNAnnotation;
@@ -358,6 +359,14 @@ MLN_EXPORT
 @property (nonatomic, assign) CGPoint scaleBarMargins;
 
 /**
+ A Boolean value indicating whether the map may display Compass View.
+
+ The view controlled by this property is available at `compassView`. The default value
+ of this property is `YES`.
+ */
+@property (nonatomic, assign) BOOL showsCompassView;
+
+/**
  A control indicating the map’s direction and allowing the user to manipulate
  the direction, positioned in the upper-right corner.
  */
@@ -375,6 +384,14 @@ MLN_EXPORT
 @property (nonatomic, assign) CGPoint compassViewMargins;
 
 /**
+ A Boolean value indicating whether the map may display MapLibre logo.
+
+ The view controlled by this property is available at `logoView`. The default value
+ of this property is `YES`.
+ */
+@property (nonatomic, assign) BOOL showsLogoView;
+
+/**
  A logo, the MapLibre logo by default, positioned in the lower-left corner.
  You are not required to display this, but some vector-sources may require attribution.
  */
@@ -390,6 +407,14 @@ MLN_EXPORT
  A `CGPoint` indicating the position offset of the logo.
  */
 @property (nonatomic, assign) CGPoint logoViewMargins;
+
+/**
+ A Boolean value indicating whether the map may display Attribution Button.
+
+ The view controlled by this property is available at `attributionButton`. The default value
+ of this property is `YES`.
+ */
+@property (nonatomic, assign) BOOL showsAttributionButton;
 
 /**
  A view showing legally required copyright notices,
@@ -508,7 +533,22 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) double tileLodZoomShift;
 
+/**
+ Frustum offset used to disable rendering of elements at the edge of the screen
+
+ Offset applied to camera frustum and scissor rectangle. The camrea frustum is modified
+ to avoid loading geometry that's behind UI elements at the top of the screen. The scissor
+ rectangle is used to avoid shading fragments that are behind UI elements at the edges of
+ the screen. All values are in logical pixels.
+ */
+@property (nonatomic, assign) UIEdgeInsets frustumOffset;
+
 // MARK: Displaying the User’s Location
+
+/**
+ Disabled using a current location manager.
+ */
+- (void)disableLocationManager;
 
 /**
  The object that this map view uses to start and stop the delivery of
@@ -551,11 +591,23 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL showsUserLocation;
 
 /**
- A boolean value indicating whether camera animation duration is set based
- on the time difference between the last location update and the current one
- or the default animation duration of 1 second.
+ A boolean value indicating whether the location indicator is drawn using the location
+ indicator layer or the location indication annotation.
+ */
+@property (nonatomic, assign) BOOL useLocationIndicatorLayer;
 
- The default value of this property is `NO`
+/**
+ A boolean value indicating whether the camera allows for concurrent animations. This is
+ a temporary feature flag to avoid breaking existing functionality.
+ */
+@property (nonatomic, assign) BOOL concurrentAnimations;
+
+/**
+A boolean value indicating whether camera animation duration is set based
+on the time difference between the last location update and the current one
+or the default animation duration of 1 second.
+
+The default value of this property is `NO`
  */
 @property (nonatomic, assign) BOOL dynamicNavigationCameraAnimationDuration;
 
@@ -668,6 +720,13 @@ MLN_EXPORT
  @param duration The duration to animate the change in seconds.
 */
 - (void)updateUserLocationAnnotationViewAnimatedWithDuration:(NSTimeInterval)duration;
+
+/**
+ Creates or updates the user location annotation view. This method calls the
+ `mapView:viewForAnnotation:` delegate method to obtain a custom view. If no custom view is
+ provided, it defaults to a native one.
+ */
+- (void)createUserLocationAnnotationView;
 
 /**
  A Boolean value indicating whether the user location annotation may display a
@@ -825,6 +884,15 @@ vertically on the map.
  programmatically.
  */
 @property (nonatomic, getter=isRotateEnabled) BOOL rotateEnabled;
+
+/**
+The threshold, measured in degrees, that determines when the map's bearing will snap to north.
+For example, with a toleranceForSnappingToNorth of 7, if the user rotates the map within 7 degrees
+of north, the map will automatically snap to exact north.
+
+ The default value of this property is 7.
+ */
+@property (nonatomic) CGFloat toleranceForSnappingToNorth;
 
 /**
  A Boolean value that determines whether the user may change the pitch (tilt) of
@@ -1017,8 +1085,6 @@ vertically on the map.
 
 /**
  * The maximum bounds of the map that can be shown on screen.
- *
- * @param MLNCoordinateBounds the bounds to constrain the screen to.
  */
 @property (nonatomic) MLNCoordinateBounds maximumScreenBounds;
 
@@ -1632,6 +1698,16 @@ vertically on the map.
 - (void)setContentInset:(UIEdgeInsets)contentInset
                animated:(BOOL)animated
       completionHandler:(nullable void (^)(void))completion;
+
+/**
+ Toggling between the Transform and the TransformActive implementation.
+
+ It allows us to switch between the two implementations at runtime.
+
+ It also resets the current transform state so be careful when using it
+ in the middle of a transformation.
+ */
+- (void)toggleTransform;
 
 // MARK: Converting Geographic Coordinates
 
@@ -2275,6 +2351,16 @@ vertically on the map.
  Adds a plug-in layer that is external to this library
  */
 - (void)addPluginLayerType:(Class)pluginLayerClass;
+
+/**
+ Adds a plug-in protocol handler that is external to this library
+ */
+- (void)addPluginProtocolHandler:(Class)pluginProtocolHandlerClass;
+
+/**
+ Adds a style filter to the map view
+ */
+- (void)addStyleFilter:(MLNStyleFilter *)styleFilter;
 
 @end
 

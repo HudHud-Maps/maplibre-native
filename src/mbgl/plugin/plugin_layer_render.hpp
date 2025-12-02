@@ -29,14 +29,14 @@ public:
     void prepare(const LayerPrepareParameters&) override;
 
     void upload(gfx::UploadPass&) override;
-    void render(PaintParameters&) override {};
-    void render2(PaintParameters&);
 
     void setRenderFunction(style::PluginLayer::OnRenderLayer renderFunction) { _renderFunction = renderFunction; }
     void setUpdateFunction(style::PluginLayer::OnUpdateLayer updateFunction) { _updateFunction = updateFunction; }
     void setUpdatePropertiesFunction(style::PluginLayer::OnUpdateLayerProperties updateLayerPropertiesFunction) {
         _updateLayerPropertiesFunction = updateLayerPropertiesFunction;
     }
+
+    void callRenderFunction(PaintParameters& paintParameters);
 
 private:
     void transition(const TransitionParameters&) override;

@@ -30,12 +30,15 @@
 #include <mbgl/plugin/plugin_layer_factory.hpp>
 #include <mbgl/plugin/plugin_layer.hpp>
 #include <mbgl/plugin/plugin_layer_impl.hpp>
+#include <mbgl/plugin/plugin_file_source.hpp>
+#include <mbgl/plugin/plugin_style_filter.hpp>
 #include <mbgl/plugin/feature_collection.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/util/rect.hpp>
 #include <mbgl/mtl/texture2d.hpp>
+#include <mbgl/storage/file_source_manager.hpp>
 
 #import "Mapbox.h"
 #import "MLNShape_Private.h"
@@ -83,9 +86,13 @@
 #import "MLNActionJournalOptions_Private.h"
 #import "MLNMapProjection.h"
 #import "MLNPluginLayer.h"
+#import "MLNPluginProtocolHandler.h"
 #import "MLNStyleLayerManager.h"
 #include "MLNPluginStyleLayer_Private.h"
 #include "MLNPluginLayer_Private.h"
+#import "MLNLocationIndicatorUserLocationAnnotationView.h"
+#include "MLNStyleFilter.h"
+#include "MLNStyleFilter_Private.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -294,9 +301,6 @@ const double MLNMinimumZoomLevelForUserTracking = 10.5;
 /// Initial zoom level when entering user tracking mode from a low zoom level.
 const double MLNDefaultZoomLevelForUserTracking = 14.0;
 
-/// Tolerance for snapping to true north, measured in degrees in either direction.
-const CLLocationDirection MLNToleranceForSnappingToNorth = 7;
-
 /// Distance threshold to stop the camera while animating.
 const CLLocationDistance MLNDistanceThresholdForCameraPause = 500;
 
@@ -456,8 +460,12 @@ public:
 @property (nonatomic) CADisplayLink *displayLink;
 @property (nonatomic, assign) BOOL needsDisplayRefresh;
 
-// Plugin Layers
+// Plugin Objects
 @property NSMutableArray *pluginLayers;
+@property NSMutableArray *pluginProtocols;
+
+// Style Filters
+@property NSMutableArray *styleFilters;
 
 @end
 
@@ -634,12 +642,16 @@ public:
 
 - (void)setStyleURL:(nullable NSURL *)styleURL
 {
+    // Remove all the plugin layers
+    [self.pluginLayers removeAllObjects];
+
     if ( ! styleURL)
     {
         styleURL = [MLNStyle defaultStyleURL];
     }
     MLNLogDebug(@"Setting styleURL: %@", styleURL);
     styleURL = styleURL.mgl_URLByStandardizingScheme;
+    [self removeLocationIndicatorLayer];
     self.style = nil;
     self.mbglMap.getStyle().loadURL([[styleURL absoluteString] UTF8String]);
 }
@@ -657,8 +669,15 @@ public:
 - (IBAction)reloadStyle:(__unused id)sender {
     MLNLogInfo(@"Reloading style.");
     NSURL *styleURL = self.styleURL;
+    [self removeLocationIndicatorLayer];
     self.mbglMap.getStyle().loadURL("");
     self.styleURL = styleURL;
+}
+
+- (void)removeLocationIndicatorLayer {
+    if (self.userLocationAnnotationView && [self.userLocationAnnotationView isKindOfClass:[MLNLocationIndicatorUserLocationAnnotationView class]]) {
+        [(MLNLocationIndicatorUserLocationAnnotationView*)self.userLocationAnnotationView removeLayer];
+    }
 }
 
 - (mbgl::Map &)mbglMap
@@ -786,6 +805,10 @@ public:
         NSStringFromClass(self.class));
     });
 
+    _showsLogoView = YES;
+    _showsCompassView = YES;
+    _showsAttributionButton = YES;
+
     // setup logo
     //
     UIImage *logo = [UIImage mgl_resourceImageNamed:@"maplibre-logo-stroke-gray"];
@@ -794,6 +817,7 @@ public:
     _logoView.accessibilityLabel = NSLocalizedStringWithDefaultValue(@"LOGO_A11Y_LABEL", nil, nil, @"Mapbox", @"Accessibility label");
     _logoView.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_logoView];
+    _logoView.hidden = !_showsLogoView;
     _logoViewConstraints = [NSMutableArray array];
     _logoViewPosition = MLNOrnamentPositionBottomLeft;
     _logoViewMargins = MLNOrnamentDefaultPositionOffset;
@@ -806,6 +830,7 @@ public:
     [_attributionButton addTarget:self action:@selector(showAttribution:) forControlEvents:UIControlEventTouchUpInside];
     _attributionButton.translatesAutoresizingMaskIntoConstraints = NO;
     [self addSubview:_attributionButton];
+    _attributionButton.hidden = !_showsAttributionButton;
     _attributionButtonConstraints = [NSMutableArray array];
 
     UILongPressGestureRecognizer *attributionLongPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(showAttribution:)];
@@ -817,6 +842,7 @@ public:
     //
     _compassView = [MLNCompassButton compassButtonWithMapView:self];
     [self addSubview:_compassView];
+    _compassView.hidden = !_showsCompassView;
     _compassViewConstraints = [NSMutableArray array];
     _compassViewPosition = MLNOrnamentPositionTopRight;
     _compassViewMargins = MLNOrnamentDefaultPositionOffset;
@@ -880,6 +906,7 @@ public:
     [self addGestureRecognizer:_rotate];
     _rotateEnabled = YES;
     _rotationThresholdWhileZooming = 3;
+    _toleranceForSnappingToNorth = 7;
 
     _doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTapGesture:)];
     _doubleTap.numberOfTapsRequired = 2;
@@ -1444,6 +1471,11 @@ public:
 
     // Compass, logo and attribution button constraints needs to be updated.z
     [self installConstraints];
+}
+
+- (void)toggleTransform
+{
+    self.mbglMap.toggleTransform();
 }
 
 /// Returns the frame of inset content within the map view.
@@ -2257,7 +2289,6 @@ public:
 
         [self notifyGestureDidEndWithDrift:drift];
     }
-
 }
 
 - (void)handlePinchGesture:(UIPinchGestureRecognizer *)pinch
@@ -2434,7 +2465,6 @@ public:
         }
 
         [self cameraIsChanging];
-
         // Trigger a light haptic feedback event when the user rotates to due north.
         if (@available(iOS 10.0, *))
         {
@@ -2760,7 +2790,6 @@ public:
             }
 
             [self cameraIsChanging];
-
         }
 
 
@@ -3231,6 +3260,27 @@ static void *windowScreenContext = &windowScreenContext;
     }
 }
 
+- (void)setShowsLogoView:(BOOL)showsLogoView
+{
+    MLNLogDebug(@"Setting showsLogoView: %@", MLNStringFromBOOL(showsLogoView));
+    _showsLogoView = showsLogoView;
+    self.logoView.hidden = !showsLogoView;
+}
+
+- (void)setShowsCompassView:(BOOL)showsCompassView
+{
+    MLNLogDebug(@"Setting showsCompassView: %@", MLNStringFromBOOL(showsCompassView));
+    _showsCompassView = showsCompassView;
+    self.compassView.hidden = !showsCompassView;
+}
+
+- (void)setShowsAttributionButton:(BOOL)showsAttributionButton
+{
+    MLNLogDebug(@"Setting showsAttributionButton: %@", MLNStringFromBOOL(showsAttributionButton));
+    _showsAttributionButton = showsAttributionButton;
+    self.attributionButton.hidden = !showsAttributionButton;
+}
+
 - (void)setScaleBarShouldShowDarkStyles:(BOOL)scaleBarShouldShowDarkStyles {
 
     _scaleBarShouldShowDarkStyles = scaleBarShouldShowDarkStyles;
@@ -3303,6 +3353,16 @@ static void *windowScreenContext = &windowScreenContext;
 -(double)tileLodZoomShift
 {
     return _mbglMap->getTileLodZoomShift();
+}
+
+-(void)setFrustumOffset:(UIEdgeInsets)frustumOffset
+{
+    _mbglMap->setFrustumOffset(MLNEdgeInsetsFromNSEdgeInsets(frustumOffset));
+}
+
+-(UIEdgeInsets)frustumOffset
+{
+    return NSEdgeInsetsFromMLNEdgeInsets(_mbglMap->getFrustumOffset());
 }
 
 // MARK: - Accessibility -
@@ -3528,7 +3588,12 @@ static void *windowScreenContext = &windowScreenContext;
 - (id)accessibilityElementForAnnotationWithTag:(MLNAnnotationTag)annotationTag
 {
     MLNAssert(_annotationContextsByAnnotationTag.count(annotationTag), @"Missing annotation for tag %llu.", annotationTag);
-    MLNAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(annotationTag);
+    auto annotationContextIt = _annotationContextsByAnnotationTag.find(annotationTag);
+    if (annotationContextIt == _annotationContextsByAnnotationTag.end()) {
+        return nil;
+    }
+
+    MLNAnnotationContext &annotationContext = annotationContextIt->second;
     id <MLNAnnotation> annotation = annotationContext.annotation;
 
     // Let the annotation view serve as its own accessibility element.
@@ -4461,7 +4526,7 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)cancelTransitions {
-    if (!_mbglMap)
+    if (!_mbglMap || self.concurrentAnimations)
     {
         return;
     }
@@ -5987,9 +6052,18 @@ static void *windowScreenContext = &windowScreenContext;
 
 // MARK: - User Location -
 
+
+- (void)disableLocationManager
+{
+    [_locationManager stopUpdatingLocation];
+    [_locationManager stopUpdatingHeading];
+    _locationManager = nil;
+}
+
 - (void)setLocationManager:(nullable id<MLNLocationManager>)locationManager
 {
     MLNLogDebug(@"Setting locationManager: %@", locationManager);
+
     if (!locationManager) {
         locationManager = [[MLNCLLocationManager alloc] init];
     }
@@ -6049,6 +6123,32 @@ static void *windowScreenContext = &windowScreenContext;
     return dictionary[@"MLNAccuracyAuthorizationDescription"];
 }
 
+- (void)createUserLocationAnnotationView {
+    MLNUserLocationAnnotationView *userLocationAnnotationView;
+
+    if ([self.delegate respondsToSelector:@selector(mapView:viewForAnnotation:)])
+    {
+        userLocationAnnotationView = (MLNUserLocationAnnotationView *)[self.delegate mapView:self viewForAnnotation:self.userLocation];
+        if (userLocationAnnotationView && ! [userLocationAnnotationView isKindOfClass:MLNUserLocationAnnotationView.class])
+        {
+            [NSException raise:MLNUserLocationAnnotationTypeException
+                        format:@"User location annotation view must be a kind of MLNUserLocationAnnotationView. %@", userLocationAnnotationView.debugDescription];
+        }
+    }
+
+    if (self.userLocationAnnotationView) {
+        [self.userLocationAnnotationView removeFromSuperview];
+    }
+    self.userLocationAnnotationView = userLocationAnnotationView ?: self.useLocationIndicatorLayer ? [[MLNLocationIndicatorUserLocationAnnotationView alloc] init] : [[MLNFaux3DUserLocationAnnotationView alloc] init];
+    self.userLocationAnnotationView.mapView = self;
+    self.userLocationAnnotationView.userLocation = self.userLocation;
+
+    self.userLocationAnnotationView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin |
+                                                        UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
+
+    [self.userLocationAnnotationView update];
+}
+
 - (void)setShowsUserLocation:(BOOL)showsUserLocation
 {
     MLNLogDebug(@"Setting showsUserLocation: %@", MLNStringFromBOOL(showsUserLocation));
@@ -6064,25 +6164,7 @@ static void *windowScreenContext = &windowScreenContext;
         }
 
         self.userLocation = [[MLNUserLocation alloc] initWithMapView:self];
-
-        MLNUserLocationAnnotationView *userLocationAnnotationView;
-
-        if ([self.delegate respondsToSelector:@selector(mapView:viewForAnnotation:)])
-        {
-            userLocationAnnotationView = (MLNUserLocationAnnotationView *)[self.delegate mapView:self viewForAnnotation:self.userLocation];
-            if (userLocationAnnotationView && ! [userLocationAnnotationView isKindOfClass:MLNUserLocationAnnotationView.class])
-            {
-                [NSException raise:MLNUserLocationAnnotationTypeException
-                            format:@"User location annotation view must be a kind of MLNUserLocationAnnotationView. %@", userLocationAnnotationView.debugDescription];
-            }
-        }
-
-        self.userLocationAnnotationView = userLocationAnnotationView ?: [[MLNFaux3DUserLocationAnnotationView alloc] init];
-        self.userLocationAnnotationView.mapView = self;
-        self.userLocationAnnotationView.userLocation = self.userLocation;
-
-        self.userLocationAnnotationView.autoresizingMask = (UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin |
-                                                            UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin);
+        [self createUserLocationAnnotationView];
 
         [self validateLocationServices];
     }
@@ -6806,8 +6888,8 @@ static void *windowScreenContext = &windowScreenContext;
         [self unrotateIfNeededAnimated:YES];
 
         // Snap to north.
-        if ((self.direction < MLNToleranceForSnappingToNorth
-             || self.direction > 360 - MLNToleranceForSnappingToNorth)
+        if ((self.direction < self.toleranceForSnappingToNorth
+             || self.direction > 360 - self.toleranceForSnappingToNorth)
             && self.userTrackingMode != MLNUserTrackingModeFollowWithHeading
             && self.userTrackingMode != MLNUserTrackingModeFollowWithCourse)
         {
@@ -7853,14 +7935,6 @@ static void *windowScreenContext = &windowScreenContext;
 
         // If this layer can read tile features, then setup that lambda
         if (capabilities.supportsReadingTileFeatures) {
-            pluginLayerImpl->setFeatureLoadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::Feature> feature) {
-
-                @autoreleasepool {
-                    MLNPluginLayerTileFeature *tileFeature = [weakMapView featureFromCore:feature];
-
-                    [weakPlugInLayer onFeatureLoaded:tileFeature];
-                }
-            });
 
             pluginLayerImpl->setFeatureCollectionLoadedFunction([weakPlugInLayer, weakMapView](const std::shared_ptr<mbgl::plugin::FeatureCollection> featureCollection) {
 
@@ -7979,6 +8053,169 @@ static void *windowScreenContext = &windowScreenContext;
     //darwinLayerManager->addLayerTypeCoreOnly(std::move(factory));
 
 }
+
+- (MLNPluginProtocolHandlerResource *)resourceFromCoreResource:(const mbgl::Resource &)resource {
+
+    MLNPluginProtocolHandlerResource *tempResult = [[MLNPluginProtocolHandlerResource alloc] init];
+
+    // The URL of the request
+    tempResult.resourceURL = [NSString stringWithUTF8String:resource.url.c_str()];
+
+    // The kind of request
+    switch (resource.kind) {
+        case mbgl::Resource::Kind::Style:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindStyle;
+            break;
+        case mbgl::Resource::Kind::Source:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSource;
+            break;
+        case mbgl::Resource::Kind::Tile:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindTile;
+            break;
+        case mbgl::Resource::Kind::Glyphs:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindGlyphs;
+            break;
+        case mbgl::Resource::Kind::SpriteImage:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSpriteImage;
+            break;
+        case mbgl::Resource::Kind::Image:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindImage;
+            break;
+        case mbgl::Resource::Kind::SpriteJSON:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindSpriteJSON;
+            break;
+        default:
+            tempResult.resourceKind = MLNPluginProtocolHandlerResourceKindUnknown;
+            break;
+    }
+
+    // The loading method
+    if (resource.loadingMethod == mbgl::Resource::LoadingMethod::CacheOnly) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodCacheOnly;
+    } else if (resource.loadingMethod == mbgl::Resource::LoadingMethod::NetworkOnly) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodNetworkOnly;
+    } else if (resource.loadingMethod == mbgl::Resource::LoadingMethod::All) {
+        tempResult.loadingMethod = MLNPluginProtocolHandlerResourceLoadingMethodAll;
+    }
+
+    if (resource.tileData) {
+        auto td = *resource.tileData;
+        MLNTileData *tileData = [[MLNTileData alloc] init];
+        tileData.tileURLTemplate = [NSString stringWithUTF8String:td.urlTemplate.c_str()];
+        tileData.tilePixelRatio = td.pixelRatio;
+        tileData.tileX = td.x;
+        tileData.tileY = td.y;
+        tileData.tileZoom = td.z;
+        tempResult.tileData = tileData;
+    }
+
+    // TODO: Figure out which other properties from resource should be passed along here
+/*
+    Usage usage{Usage::Online};
+    Priority priority{Priority::Regular};
+    std::optional<std::pair<uint64_t, uint64_t>> dataRange = std::nullopt;
+    std::optional<Timestamp> priorModified = std::nullopt;
+    std::optional<Timestamp> priorExpires = std::nullopt;
+    std::optional<std::string> priorEtag = std::nullopt;
+    std::shared_ptr<const std::string> priorData;
+    Duration minimumUpdateInterval{Duration::zero()};
+    StoragePolicy storagePolicy{StoragePolicy::Permanent};
+    */
+
+    return tempResult;
+
+}
+
+- (void)addPluginProtocolHandler:(Class)pluginProtocolHandlerClass {
+
+
+    MLNPluginProtocolHandler *handler = [[pluginProtocolHandlerClass alloc] init];
+    if (!self.pluginProtocols) {
+        self.pluginProtocols = [NSMutableArray array];
+    }
+    [self.pluginProtocols addObject:handler];
+
+    // TODO: Unclear if any of these options are needed for plugins
+    mbgl::ResourceOptions resourceOptions;
+
+    // TODO: Unclear if any of the properties on clientOptions need to be set
+    mbgl::ClientOptions clientOptions;
+
+    // Use weak here so there isn't a retain cycle
+    __weak MLNPluginProtocolHandler *weakHandler = handler;
+    __weak MLNMapView *weakSelf = self;
+
+    std::shared_ptr<mbgl::PluginFileSource> pluginSource = std::make_shared<mbgl::PluginFileSource>(resourceOptions, clientOptions);
+    pluginSource->setOnRequestResourceFunction([weakHandler, weakSelf](const mbgl::Resource &resource) -> mbgl::Response {
+        mbgl::Response tempResult;
+
+        __strong MLNPluginProtocolHandler *strongHandler = weakHandler;
+        if (strongHandler) {
+
+            MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
+
+            // TODO: Figure out what other fields in response need to be passed back from requestResource
+            MLNPluginProtocolHandlerResponse *response = [strongHandler requestResource:res];
+            if (response.data) {
+                tempResult.data = std::make_shared<std::string>((const char*)[response.data bytes],
+                                                                [response.data length]);
+            }
+        }
+
+        return tempResult;
+
+    });
+
+    pluginSource->setOnCanRequestFunction([weakHandler, weakSelf](const mbgl::Resource &resource) -> bool{
+        @autoreleasepool {
+            __strong MLNPluginProtocolHandler *strongHandler = weakHandler;
+            if (!strongHandler) {
+                return false;
+            }
+
+            MLNPluginProtocolHandlerResource *res = [weakSelf resourceFromCoreResource:resource];
+            BOOL tempResult = [strongHandler canRequestResource:res];
+
+            return tempResult;
+
+        }
+    });
+
+    auto fileSourceManager = mbgl::FileSourceManager::get();
+    fileSourceManager->registerCustomFileSource(pluginSource);
+
+}
+
+-(void)addStyleFilter:(MLNStyleFilter *)styleFilter {
+
+    if (!self.styleFilters) {
+        self.styleFilters = [NSMutableArray array];
+    }
+    [self.styleFilters addObject:styleFilter];
+
+    auto coreStyleFilter = std::make_shared<mbgl::style::PluginStyleFilter>();
+    coreStyleFilter->_filterStyleFunction = [styleFilter](const std::string &filterData) -> const std::string {
+
+        std::string tempResult;
+
+        @autoreleasepool {
+            NSData *sourceData = [NSData dataWithBytesNoCopy:(void *)filterData.data()
+                                                      length:filterData.size()
+                                                freeWhenDone:NO];
+            NSData *filteredData = [styleFilter filterData:sourceData];
+            tempResult = std::string((const char*)[filteredData bytes], [filteredData length]);
+
+        }
+        return tempResult;
+    };
+
+    // Set the ivar
+    [styleFilter setFilter:coreStyleFilter];
+
+    _mbglMap->getStyle().addStyleFilter(coreStyleFilter);
+
+}
+
 
 - (NSArray<NSString*>*)getActionJournalLogFiles
 {

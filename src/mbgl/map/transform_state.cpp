@@ -4,6 +4,7 @@
 #include <mbgl/math/log2.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/geo.hpp>
 #include <mbgl/util/interpolate.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/projection.hpp>
@@ -88,6 +89,9 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
     if (properties.viewPortMode) {
         setViewportMode(*properties.viewPortMode);
     }
+    if (properties.frustumOffset) {
+        setFrustumOffset(*properties.frustumOffset);
+    }
 }
 
 // MARK: - Matrix
@@ -120,7 +124,8 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     // (the distance between[width/2, height/2] and [width/2 + 1, height/2])
     // See https://github.com/mapbox/mapbox-gl-native/pull/15195 for details.
     // See TransformState::fov description: fov = 2 * arctan((height / 2) / (height * 1.5)).
-    const double tanFovAboveCenter = (size.height * 0.5 + offset.y) / (size.height * 1.5);
+    const double tanFovAboveCenter =
+        ((size.height - frustumOffset.top()) * 0.5 + (offset.y - (frustumOffset.top() / 2))) / (size.height * 1.5);
     const double tanMultiple = tanFovAboveCenter * std::tan(getPitch());
     assert(tanMultiple < 1);
     // Calculate z distance of the farthest fragment that should be rendered.
@@ -368,6 +373,17 @@ Size TransformState::getSize() const {
 void TransformState::setSize(const Size& size_) {
     if (size != size_) {
         size = size_;
+        requestMatricesUpdate = true;
+    }
+}
+
+EdgeInsets TransformState::getFrustumOffset() const {
+    return frustumOffset;
+}
+
+void TransformState::setFrustumOffset(const EdgeInsets& frustumOffset_) {
+    if (frustumOffset != frustumOffset_) {
+        frustumOffset = frustumOffset_;
         requestMatricesUpdate = true;
     }
 }
@@ -689,7 +705,7 @@ ScreenCoordinate TransformState::latLngToScreenCoordinate(const LatLng& latLng, 
 
 TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoordinate& point, uint8_t atZoom) const {
     if (size.isEmpty()) {
-        return {{}, 0};
+        return {.p = {}, .z = 0};
     }
 
     float targetZ = 0;
@@ -718,7 +734,7 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
     double t = z0 == z1 ? 0 : (targetZ - z0) / (z1 - z0);
 
     Point<double> p = util::interpolate(p0, p1, t) / scale * static_cast<double>(1 << atZoom);
-    return {{p.x, p.y}, static_cast<double>(atZoom)};
+    return {.p = {p.x, p.y}, .z = static_cast<double>(atZoom)};
 }
 
 LatLng TransformState::screenCoordinateToLatLng(const ScreenCoordinate& point, LatLng::WrapMode wrapMode) const {

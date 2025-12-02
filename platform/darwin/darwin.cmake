@@ -12,6 +12,18 @@ target_link_libraries(
         z
 )
 
+if(TARGET mbgl-vendor-dawn)
+    target_link_libraries(
+        mbgl-vendor-dawn
+        INTERFACE
+            "-framework Metal"
+            "-framework QuartzCore"
+            "-framework IOKit"
+            "-framework IOSurface"
+            "-framework CoreGraphics"
+    )
+endif()
+
 if(MLN_DARWIN_USE_LIBUV)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(LIBUV REQUIRED IMPORTED_TARGET libuv)
@@ -63,6 +75,7 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_database.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/offline_download.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/online_file_source.cpp
+        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/plugin_file_source.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/$<IF:$<BOOL:${MLN_WITH_PMTILES}>,pmtiles_file_source.cpp,pmtiles_file_source_stub.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/sqlite3.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/text/bidi.cpp
@@ -111,6 +124,7 @@ set(MLN_GENERATED_DARWIN_STYLE_SOURCE
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNLineStyleLayer.mm"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNRasterStyleLayer.mm"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNSymbolStyleLayer.mm"
+    "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNLocationIndicatorStyleLayer.mm"
 )
 
 set(MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS
@@ -124,6 +138,7 @@ set(MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNFillStyleLayer.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNHillshadeStyleLayer.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNRasterStyleLayer.h"
+     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNLocationIndicatorStyleLayer.h"
 )
 
 set(MLN_GENERATED_DARWIN_STYLE_HEADERS
@@ -136,6 +151,7 @@ set(MLN_GENERATED_DARWIN_STYLE_HEADERS
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNCircleStyleLayer_Private.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNFillStyleLayer_Private.h"
     "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNHillshadeStyleLayer_Private.h"
+    "${MLN_GENERATED_DARWIN_CODE_DIR}/MLNLocationIndicatorStyleLayer_Private.h"
     ${MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS}
 )
 
@@ -164,6 +180,8 @@ add_library(
     "${CMAKE_CURRENT_LIST_DIR}/app/CustomStyleLayerExample.m"
     "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExample.mm"
     "${CMAKE_CURRENT_LIST_DIR}/app/PluginLayerExampleMetalRendering.mm"
+    "${CMAKE_CURRENT_LIST_DIR}/app/PluginProtocolExample.mm"
+    "${CMAKE_CURRENT_LIST_DIR}/app/StyleFilterExample.mm"
 )
 
 target_link_libraries(
@@ -171,13 +189,6 @@ target_link_libraries(
     PUBLIC ios-sdk-static
     PRIVATE mbgl-compiler-options mbgl-core
 )
-
-if(MLN_WITH_METAL)
-    target_compile_definitions(
-        custom-layer-examples
-        PRIVATE MLN_RENDER_BACKEND_METAL=1
-    )
-endif()
 
 target_include_directories(
     custom-layer-examples

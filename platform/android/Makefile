@@ -59,7 +59,7 @@ MLN_ANDROID_GRADLE_SINGLE_JOB = ./gradlew --parallel --max-workers=1 -Pmapbox.bu
 # Generate code based on the style specification
 .PHONY: android-style-code
 android-style-code:
-	node scripts/generate-style-code.js
+	node scripts/generate-style-code.mjs
 style-code: android-style-code
 
 define ANDROID_RULES
@@ -246,7 +246,7 @@ run-android-test-app-center:
 # Uploads the compiled Android SDK to Maven Central Staging
 .PHONY: run-android-publish
 run-android-publish:
-	$(MLN_ANDROID_GRADLE_SINGLE_JOB)-Pmaplibre.abis=all :MapLibreAndroid:publishAllPublicationsToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+	$(MLN_ANDROID_GRADLE_SINGLE_JOB) -Pmaplibre.abis=all publish
 
 # Dump system graphics information for the test app
 .PHONY: android-gfxinfo

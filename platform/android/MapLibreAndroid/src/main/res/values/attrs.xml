@@ -16,6 +16,7 @@
         <attr name="maplibre_actionJournalEnabled" format="boolean"/>
         <attr name="maplibre_actionJournalLogFileSize" format="integer"/>
         <attr name="maplibre_actionJournalLogFileCount" format="integer"/>
+        <attr name="maplibre_actionJournalRenderingReportInterval" format="integer"/>
 
         <!--Camera-->
         <attr name="maplibre_cameraTargetLat" format="float"/>
@@ -23,6 +24,7 @@
         <attr name="maplibre_cameraZoom" format="float"/>
         <attr name="maplibre_cameraBearing" format="float"/>
         <attr name="maplibre_cameraTilt" format="float"/>
+        <attr name="maplibre_cameraCancelTransition" format="boolean"/>
 
         <!--Zoom-->
         <attr name="maplibre_cameraZoomMax" format="float"/>
@@ -201,6 +203,9 @@
         <attr name="maplibre_pulsingLocationCircleRadius" format="float" />
         <attr name="maplibre_pulsingLocationCircleAlpha" format="float" />
         <attr name="maplibre_pulsingLocationCircleInterpolator" format="string" />
+
+        <!-- Camera Animation -->
+        <attr name="maplibre_concurrentCameraAnimation" format="boolean" />
 
     </declare-styleable>
 </resources>
