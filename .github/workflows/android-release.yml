@@ -62,7 +62,7 @@ jobs:
 
   android-build-and-upload-release:
     needs: android-create-release
-    runs-on: ubuntu-24.04
+    runs-on: gha-runner-scale-set-android
     defaults:
       run:
         working-directory: platform/android
@@ -81,28 +81,6 @@ jobs:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v4
         with:
           submodules: recursive
-
-      - name: Free disk space
-        working-directory: .
-        run: .github/scripts/free_disk_space.sh
-
-      - name: Setup build directories on /mnt
-        working-directory: .
-        run: |
-          echo "Disk space before setup:"
-          df -h
-
-          # Create build directories on /mnt
-          sudo mkdir -p /mnt/gradle /mnt/build /mnt/android-sdk
-          sudo chown -R "$USER":"$USER" /mnt/gradle /mnt/build /mnt/android-sdk
-
-          # Create symlinks for build directories
-          mkdir -p platform/android
-          ln -sfn /mnt/build platform/android/build || true
-
-          # Configure gradle to use /mnt
-          echo "gradle.user.home=/mnt/gradle" >> gradle.properties || true
-          echo "buildDir=/mnt/build" >> gradle.properties || true
 
       - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v4
         with:
