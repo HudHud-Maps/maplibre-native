@@ -220,8 +220,6 @@ void Drawable::draw(PaintParameters& parameters) const {
     renderPass.setFrontFacingWinding(mapWindingMode(cullMode.winding));
     renderPass.setScissorRect(getMetalScissorRect(parameters.scissorRect));
 
-    renderPass.setScissorRect(getMetalScissorRect(parameters.scissorRect));
-
     if (!impl->pipelineState) {
         impl->pipelineState = shaderMTL.getRenderPipelineState(
             renderable,
