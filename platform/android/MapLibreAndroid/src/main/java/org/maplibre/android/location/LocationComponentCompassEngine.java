@@ -304,7 +304,10 @@ class LocationComponentCompassEngine implements CompassEngine, SensorEventListen
     if (smoothedValues == null) {
       return newValues;
     }
-    for (int i = 0; i < newValues.length; i++) {
+
+    // some OEMs may return 4 items in the sensor values array for the accelerometer which would crash
+    final int iterations = Math.min(newValues.length, smoothedValues.length);
+    for (int i = 0; i < iterations; i++) {
       smoothedValues[i] = smoothedValues[i] + ALPHA * (newValues[i] - smoothedValues[i]);
     }
     return smoothedValues;
