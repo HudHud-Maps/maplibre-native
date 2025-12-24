@@ -14,12 +14,17 @@
 
 - Cancel pending style request when loading style JSON ([#3989](https://github.com/maplibre/maplibre-native/pull/3989)).
 
+## 12.2.3
+
+### 🐞 Bug fixes
+
+- Correctly keep plugin implementation when building for release
+
 ## 12.2.2
 
 ### 🐞 Bug fixes
 
 - Do not crash when OEMs return 4 sensor values instead of 3 for accelerometer sensor changes.
-
 - Fix crash due to pure virtual function call v2 ([#3996](https://github.com/maplibre/maplibre-native/pull/3996)).
 
 ## 12.2.1
