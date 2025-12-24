@@ -1,5 +1,19 @@
 # Changelog MapLibre Native for Android
 
+## 12.3.1
+
+- Fix issue caused by frustum offset when map is resized [#4015](https://github.com/maplibre/maplibre-native/pull/4015).
+
+## 12.3.0
+
+### ✨ Features and improvements
+
+- Implemented synchronous update for GeoJSON source ([#3968](https://github.com/maplibre/maplibre-native/pull/3968)).
+
+### 🐞 Bug fixes
+
+- Cancel pending style request when loading style JSON ([#3989](https://github.com/maplibre/maplibre-native/pull/3989)).
+
 ## 12.2.3
 
 ### 🐞 Bug fixes
@@ -11,6 +25,7 @@
 ### 🐞 Bug fixes
 
 - Do not crash when OEMs return 4 sensor values instead of 3 for accelerometer sensor changes.
+- Fix crash due to pure virtual function call v2 ([#3996](https://github.com/maplibre/maplibre-native/pull/3996)).
 
 ## 12.2.1
 
