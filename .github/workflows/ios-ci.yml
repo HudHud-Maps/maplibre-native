@@ -364,7 +364,7 @@ jobs:
             https://api.github.com/repos/hudhud-maps/maplibre-gl-native-distribution/actions/workflows/$release_workflow_name/dispatches \
             -d '{"ref":"main","inputs":{
               "version":"${{ env.version }}",
-              "download_url": "https://github.com/maplibre/maplibre-native/releases/download/ios-v${{ env.version }}/MapLibre.dynamic.xcframework.zip"}}'
+              "download_url": "https://github.com/HudHud-Maps/maplibre-native/releases/download/ios-v${{ env.version }}/MapLibre.dynamic.xcframework.zip"}}'
 
       # - run: npm install
       #   working-directory: .
