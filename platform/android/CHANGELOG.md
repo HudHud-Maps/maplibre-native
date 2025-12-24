@@ -1,6 +1,6 @@
 # Changelog MapLibre Native for Android
 
-## 12.2.2
+## 12.2.3
 
 ### 🐞 Bug fixes
 
