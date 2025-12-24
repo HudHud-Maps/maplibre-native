@@ -4,8 +4,13 @@
 
 ### 🐞 Bug fixes
 
-- Do not crash when OEMs return 4 sensor values instead of 3 for accelerometer sensor changes.
+- Correctly keep plugin implementation when building for release
 
+## 12.2.2
+
+### 🐞 Bug fixes
+
+- Do not crash when OEMs return 4 sensor values instead of 3 for accelerometer sensor changes.
 
 ## 12.2.1
 
