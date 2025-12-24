@@ -17,6 +17,10 @@
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+-keep class org.maplibre.android.plugin.PluginProtocolHandlerResource { *; }
+-keep class org.maplibre.android.plugin.PluginProtocolHandlerResponse { *; }
+-keep class org.maplibre.android.plugin.PluginFileSource { *; }
+-keep class org.maplibre.android.plugin.TileData { *; }
 
 # dontnote for keeps the entry point x but not the descriptor class y
 -dontnote org.maplibre.android.maps.MapLibreMap$OnFpsChangedListener
