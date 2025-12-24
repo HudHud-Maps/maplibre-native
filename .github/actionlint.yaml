@@ -5,6 +5,7 @@ self-hosted-runner:
     - macos-15-intel  # can be removed once actionlint is updated
     - MapLibre_Native_Ubuntu_22_04_ARM_8_core
     - MapLibre_Native_Ubuntu_24_04_x84_16_core
+    - gha-runner-scale-set-android
 # Configuration variables in array of strings defined in your repository or
 # organization. `null` means disabling configuration variables check.
 # Empty array means no configuration variable is allowed.
