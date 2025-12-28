@@ -19,6 +19,9 @@ struct MapLibreNavigationView: View {
                 NavigationLink("LocationPrivacyExample") {
                     LocationPrivacyExampleView()
                 }
+                NavigationLink("CustomLocationExample") {
+                    CustomLocationExampleView().edgesIgnoringSafeArea(.all)
+                }
                 NavigationLink("BlockingGesturesExample") {
                     BlockingGesturesExample()
                 }

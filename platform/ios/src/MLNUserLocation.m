@@ -76,7 +76,7 @@ NS_ASSUME_NONNULL_END
 - (void)setLocation:(CLLocation *)newLocation
 {
     if ( ! newLocation || ! CLLocationCoordinate2DIsValid(newLocation.coordinate)) return;
-    if ( _location && CLLocationCoordinate2DIsValid(_location.coordinate) && [newLocation distanceFromLocation:_location] == 0) return;
+    if ( _location && CLLocationCoordinate2DIsValid(_location.coordinate) && [newLocation distanceFromLocation:_location] == 0 && _location.course == newLocation.course) return;
     if (newLocation.coordinate.latitude == 0 && newLocation.coordinate.longitude == 0) return;
 
     [self willChangeValueForKey:@"location"];
